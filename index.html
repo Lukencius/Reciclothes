@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lector Profesional de Documentos Word en GitHub</title>
+    <title>Lector y Descargador Profesional de Documentos Word en GitHub</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.0/mammoth.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
@@ -66,7 +66,7 @@
             overflow-y: auto;
         }
 
-        #load-files {
+        .action-button {
             width: 100%;
             padding: 12px;
             font-size: 16px;
@@ -79,11 +79,11 @@
             margin-bottom: 20px;
         }
 
-        #load-files:hover {
+        .action-button:hover {
             background-color: var(--hover-color);
         }
 
-        #load-files:active {
+        .action-button:active {
             transform: scale(0.98);
         }
 
@@ -165,12 +165,21 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
+
+        #download-button {
+            display: none;
+            margin-top: 20px;
+        }
+
+        #download-button.visible {
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Lector Profesional de Documentos Word en GitHub</h1>
+            <h1>Lector y Descargador Profesional de Documentos Word en GitHub</h1>
         </header>
         <main>
             <div id="file-list-container">
@@ -180,10 +189,13 @@
                     <label for="github-token">Token de GitHub (opcional):</label>
                     <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
                 </div>
-                <button id="load-files">
+                <button id="load-files" class="action-button">
                     <i class="fas fa-sync-alt"></i> Cargar Archivos
                 </button>
                 <ul id="file-list"></ul>
+                <button id="download-button" class="action-button">
+                    <i class="fas fa-download"></i> Descargar Documento
+                </button>
             </div>
             <div id="document-content"></div>
         </main>
@@ -194,8 +206,11 @@
             const fileList = document.getElementById('file-list');
             const documentContent = document.getElementById('document-content');
             const loadFilesButton = document.getElementById('load-files');
+            const downloadButton = document.getElementById('download-button');
             const repoUrlInput = document.getElementById('repo-url');
             const githubTokenInput = document.getElementById('github-token');
+
+            let currentFileUrl = null;
 
             loadFilesButton.addEventListener('click', async () => {
                 const repoUrl = repoUrlInput.value;
@@ -224,7 +239,7 @@
                         if (item.type === 'file' && item.name.endsWith('.docx')) {
                             const li = document.createElement('li');
                             li.innerHTML = `<i class="far fa-file-word"></i> ${item.name}`;
-                            li.addEventListener('click', () => loadDocument(item.download_url));
+                            li.addEventListener('click', () => loadDocument(item.download_url, item.name));
                             fileList.appendChild(li);
                         }
                     });
@@ -234,7 +249,7 @@
                 }
             });
 
-            async function loadDocument(url) {
+            async function loadDocument(url, fileName) {
                 try {
                     const response = await fetch(url);
                     const arrayBuffer = await response.arrayBuffer();
@@ -245,9 +260,31 @@
                     documentContent.classList.add('fade-in');
                     documentContent.innerHTML = result.value;
 
+                    currentFileUrl = url;
+                    downloadButton.classList.add('visible');
+                    downloadButton.onclick = () => downloadDocument(url, fileName);
+
                 } catch (err) {
                     console.error('Error al cargar el documento:', err);
                     documentContent.innerHTML = '<p>Error al cargar el documento. Por favor, intenta de nuevo.</p>';
+                }
+            }
+
+            async function downloadDocument(url, fileName) {
+                try {
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = downloadUrl;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(downloadUrl);
+                } catch (err) {
+                    console.error('Error al descargar el documento:', err);
+                    alert('Error al descargar el documento. Por favor, intenta de nuevo.');
                 }
             }
         });
