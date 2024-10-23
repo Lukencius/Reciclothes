@@ -39,7 +39,7 @@ app.post('/signup', async (req, res) => {
         
         // Generar salt y hash de la contraseña
         const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
+        const salt = await bcryptjs.genSalt(saltRounds);
         const passwordHash = await bcryptjs.hash(password, salt);
         
         const [result] = await connection.execute(
