@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function cargarProductos() {
     try {
         console.log('Intentando obtener productos...');
-        const response = await fetch('http://localhost:3000/api/productos');  // URL completa
+        const response = await fetch('https://reciclothes.onrender.com/api/productos');  // URL completa
         console.log('Respuesta recibida:', response);
         const productos = await response.json();
         console.log('Productos obtenidos:', productos);
