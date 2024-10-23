@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">Iniciar Sesión</h2>
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Correo electrónico:</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Contraseña:</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                                <a href="signup.html" class="btn btn-secondary">Registrar nueva cuenta</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS y Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+
+    <!-- script para conectar con el servidor -->
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('http://localhost:3000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('token', data.token);
+                    
+                    // Comprobamos si el email es el del admin
+                    if (email.toLowerCase() === 'jimena@admin.com') {
+                        const adminToken = btoa(Date.now() + '-admin-' + Math.random());
+                        localStorage.setItem('adminToken', adminToken);
+                        window.location.href = 'admin.html?token=' + encodeURIComponent(adminToken);
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Correo electrónico o contraseña incorrectos');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al conectar con el servidor');
+            }
+        });
+    </script>
+</body>
+</html>

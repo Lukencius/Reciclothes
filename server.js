@@ -5,16 +5,16 @@ const bcrypt = require('bcrypt');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 3000;
 require('dotenv').config();
 
 // Configuración de la base de datos
 const dbConfig = {
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT,
+    host: 'servicioalochoro-prueba1631.l.aivencloud.com',
+    user: 'avnadmin',
+    password: 'AVNS_XIL6StsPZSOwo0ZxNfr',
+    database: 'RECICLOTHES',
+    port: '15140',
     charset: "utf8mb4"
 };
 
@@ -59,7 +59,7 @@ app.post('/signup', async (req, res) => {
 
 // Ruta para la página de inicio de sesión
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'LogIn.html'));
+    res.sendFile(path.join(__dirname, 'public', 'Login.html'));
 });
 
 // Ruta para el proceso de inicio de sesión
@@ -97,6 +97,28 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// Ruta para obtener todos los productos
+app.get('/api/productos', async (req, res) => {
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        console.log('Conexión a base de datos establecida');
+        
+        const [rows] = await connection.execute('SELECT * FROM Productos');
+        console.log('Productos encontrados:', rows);
+        
+        await connection.end();
+        
+        res.json(rows);
+    } catch (error) {
+        console.error('Error en el servidor:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error al obtener los productos',
+            error: error.message 
+        });
+    }
+});
+
 async function testDatabaseConnection() {
     try {
         const connection = await mysql.createConnection(dbConfig);
@@ -121,6 +143,39 @@ async function checkTableStructure() {
 }
 
 checkTableStructure();
+
+async function checkProductsTable() {
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute('DESCRIBE Productos');
+        console.log('Estructura de la tabla Productos:', rows);
+        await connection.end();
+    } catch (error) {
+        console.error('Error al verificar la tabla Productos:', error);
+        // Si la tabla no existe, la creamos
+        try {
+            const connection = await mysql.createConnection(dbConfig);
+            await connection.execute(`
+                CREATE TABLE IF NOT EXISTS Productos (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(100) NOT NULL,
+                    description TEXT,
+                    category VARCHAR(50),
+                    price DECIMAL(10,2) NOT NULL,
+                    stock INT DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+            console.log('Tabla Productos creada exitosamente');
+            await connection.end();
+        } catch (createError) {
+            console.error('Error al crear la tabla Productos:', createError);
+        }
+    }
+}
+
+// Llamar a la función de verificación al iniciar el servidor
+checkProductsTable();
 
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);

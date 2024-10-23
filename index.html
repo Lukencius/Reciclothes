@@ -9,80 +9,90 @@
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" href="media/logo.png" width="40" height="40">
+    <script src="Script.js" defer></script>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-success">
-            <div class="container">
-                <a class="navbar-brand" href="#">Reciclothes</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item"><a class="nav-link" href="#inicio">Inicio</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#categorias">Categorias</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#carrito">Carrito</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#sesion">Sesion</a></li>
-                    </ul>
+    <header class="bg-success py-2">
+        <div class="leaves-container">
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+        </div>
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <a href="#" class="text-white text-decoration-none d-flex align-items-center">
+                        <img src="media/logo.png" width="30" height="30" class="d-inline-block align-top me-2" alt="Reciclothes logo">
+                        <span class="fs-5 fw-bold custom-font">Reciclothes</span>
+                    </a>
+                </div>
+                <div class="col">
+                    <div class="dropdown">
+                        <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Categorías
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <li><a class="dropdown-item" href="#">Mujeres</a></li>
+                            <li><a class="dropdown-item" href="#">Niños</a></li>
+                            <li><a class="dropdown-item" href="#">Hombres</a></li>
+                            <li><a class="dropdown-item" href="#">Accesorios</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <form class="d-flex">
+                        <input class="form-control me-2" type="search" placeholder="Buscar productos" aria-label="Buscar">
+                        <button class="btn btn-outline-light" type="submit">Buscar</button>
+                    </form>
+                </div>
+                <div class="col-auto ms-auto">
+                    <a href="#" class="btn btn-success me-2">
+                        <i class="bi bi-cart"></i>
+                    </a>
+                    <a href="login.html" class="btn btn-success">
+                        <i class="bi bi-person"></i>
+                    </a>
                 </div>
             </div>
-        </nav>
+        </div>
     </header>
-
     <main>
-        <section id="hero" class="py-5 text-center text-white bg-dark" style="background-image: url('https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80'); background-size: cover; background-position: center;">
+        <section id="hero" class="py-5 text-center text-white bg-dark" style="background-image: url('https://treenewal.com/wp-content/uploads/2020/11/environmental_factors_affecting_trees.png'); background-size: cover; background-position: center;">
             <div class="container">
-                <h1 class="display-4">Descubre la moda sostenible</h1>
-                <p class="lead">Ropa de segunda mano de calidad a precios increíbles</p>
-                <a href="#categorias" class="btn btn-success btn-lg mt-3">Explorar ahora</a>
+                <h1 class="display-4">Reciclothes</h1>
+                <p class="lead">Renueva tu armario, renueva el planeta.</p>
             </div>
         </section>
-
-        <section id="categorias" class="py-5">
+        <section id="productos" class="py-5">
             <div class="container">
-                <h2 class="text-center mb-4">Nuestras Categorías</h2>
-                <div class="row">
-                    <div class="col-md-3 mb-4">
-                        <div class="card">
-                            <img src="https://images.unsplash.com/photo-1539008835657-9e8e9680c956?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=987&q=80" class="card-img-top" alt="Vestidos">
-                            <div class="card-body">
-                                <h5 class="card-title">Mujeres</h5>
-                                <p class="card-text">Explora nuestra colección de moda femenina de segunda mano con estilo y calidad.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card">
-                            <img src="https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80" class="card-img-top" alt="Ropa de niños">
-                            <div class="card-body">
-                                <h5 class="card-title">Niños</h5>
-                                <p class="card-text">Descubre nuestra colección de ropa infantil de segunda mano, cómoda y divertida.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card">
-                            <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80" class="card-img-top" alt="Vestidos">
-                            <div class="card-body">
-                                <h5 class="card-title">Hombres</h5>
-                                <p class="card-text">Encuentra prendas masculinas de segunda mano con estilo y a precios increíbles.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <div class="card">
-                            <img src="https://images.unsplash.com/photo-1617038220319-276d3cfab638?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=987&q=80" class="card-img-top" alt="Accesorios">
-                            <div class="card-body">
-                                <h5 class="card-title">Accesorios</h5>
-                                <p class="card-text">Complementa tu look con nuestros accesorios de segunda mano únicos y asequibles.</p>
-                            </div>
-                        </div>
-                    </div>
+                <h2 class="text-center mb-4">Nuestros Productos</h2>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-success">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Categoría</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productosBody">
+                            <!-- Aquí se cargarán los productos -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
-
         <section id="ofertas" class="py-5 bg-light">
             <div class="container">
                 <h2 class="text-center mb-4">Ofertas Especiales</h2>
@@ -109,15 +119,13 @@
                 </div>
             </div>
         </section>
-
         <section id="about" class="py-5">
             <div class="container">
                 <h2 class="text-center mb-4">Sobre Reciclothes</h2>
-                <p class="lead text-center">Somos una tienda en línea comprometida con la moda sostenible y la economía circular. Ofrecemos ropa de segunda mano cuidadosamente seleccionada para darle una nueva vida y reducir el impacto ambiental de la industria textil.</p>
+                <p class="lead text-center">Somos una tienda online dedicada a la moda sostenible. Ofrecemos una curaduría de prendas de segunda mano únicas y con estilo, para quienes buscan expresar su individualidad y cuidar del planeta. Cada pieza tiene una historia que contar y un nuevo hogar esperándote.</p>
             </div>
         </section>
     </main>
-
     <footer class="bg-dark text-white py-4">
         <div class="container">
             <div class="row">
@@ -142,6 +150,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
     <!-- Script personalizado -->
-    <script src="script.js"></script>
+    <script src="Script.js"></script>
+    <script src="productos.js"></script>
 </body>
 </html>
