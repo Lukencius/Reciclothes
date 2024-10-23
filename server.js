@@ -1,11 +1,13 @@
 const express = require('express');
-const mysql = require('mysql2/promise');
-const path = require('path');
-const bcrypt = require('bcrypt');
 const cors = require('cors');
+const bcryptjs = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+// const { Pool } = require('pg');
+const path = require('path');
+const mysql = require('mysql2/promise');
 const bodyParser = require('body-parser');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 require('dotenv').config();
 
 // Configuración de la base de datos
@@ -34,26 +36,19 @@ app.post('/signup', async (req, res) => {
         const connection = await mysql.createConnection(dbConfig);
         const { name, email, phone, address, password } = req.body;
         
-        // Generar salt y hash de la contraseña
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const passwordHash = await bcrypt.hash(password, salt);
+        // Volver a usar bcryptjs
+        const salt = await bcryptjs.genSalt(10);
+        const hashedPassword = await bcryptjs.hash(password, salt);
         
         const [result] = await connection.execute(
-            'INSERT INTO clientes (name, email, phone, address, password_hash, salt) VALUES (?, ?, ?, ?, ?, ?)',
-            [name, email, phone, address, passwordHash, salt]
+            'INSERT INTO clientes (name, email, phone, address, password_hash) VALUES (?, ?, ?, ?, ?)',
+            [name, email, phone, address, hashedPassword]
         );
         
-        await connection.end();
-        
-        if (result.affectedRows === 1) {
-            res.json({ success: true, message: 'Cliente registrado correctamente' });
-        } else {
-            res.status(500).json({ success: false, message: 'Error al registrar cliente' });
-        }
+        res.json({ success: true, message: 'Usuario registrado exitosamente' });
     } catch (error) {
-        console.error('Error en el registro:', error);
-        res.status(500).json({ success: false, message: 'Error en el servidor' });
+        console.error('Error en signup:', error);
+        res.status(500).json({ success: false, message: 'Error al registrar usuario' });
     }
 });
 
@@ -65,35 +60,42 @@ app.get('/', (req, res) => {
 // Ruta para el proceso de inicio de sesión
 app.post('/login', async (req, res) => {
     try {
-        const connection = await mysql.createConnection(dbConfig);
         const { email, password } = req.body;
         
-        // Buscar el usuario por email
-        const [rows] = await connection.execute(
-            'SELECT * FROM clientes WHERE email = ?',
-            [email]
-        );
-        
-        await connection.end();
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute('SELECT * FROM clientes WHERE email = ?', [email]);
         
         if (rows.length === 0) {
-            return res.status(400).json({ success: false, message: 'Usuario no encontrado' });
+            return res.status(401).json({ message: 'Usuario no encontrado' });
         }
         
         const user = rows[0];
         
-        // Verificar la contraseña
-        const isMatch = await bcrypt.compare(password, user.password_hash);
+        // Volver a la verificación con bcryptjs
+        const validPassword = await bcryptjs.compare(password, user.password_hash);
         
-        if (isMatch) {
-            // Aquí puedes generar un token de sesión si lo deseas
-            res.json({ success: true, message: 'Inicio de sesión exitoso' });
-        } else {
-            res.status(400).json({ success: false, message: 'Contraseña incorrecta' });
+        if (!validPassword) {
+            return res.status(401).json({ message: 'Contraseña incorrecta' });
         }
+        
+        const token = jwt.sign(
+            { userId: user.id }, 
+            process.env.JWT_SECRET || 'tu_clave_secreta',
+            { expiresIn: '24h' }
+        );
+        
+        res.json({ 
+            success: true,
+            token,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email
+            }
+        });
     } catch (error) {
-        console.error('Error en el inicio de sesión:', error);
-        res.status(500).json({ success: false, message: 'Error en el servidor' });
+        console.error('Error en login:', error);
+        res.status(500).json({ message: 'Error en el servidor' });
     }
 });
 
