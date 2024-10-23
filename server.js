@@ -79,22 +79,15 @@ app.post('/login', async (req, res) => {
         
         const user = rows[0];
         
-        // Volver a la verificación con bcryptjs
+        // Verificación con bcryptjs
         const validPassword = await bcryptjs.compare(password, user.password_hash);
         
         if (!validPassword) {
             return res.status(401).json({ message: 'Contraseña incorrecta' });
         }
         
-        const token = jwt.sign(
-            { userId: user.id }, 
-            process.env.JWT_SECRET || 'tu_clave_secreta',
-            { expiresIn: '24h' }
-        );
-        
         res.json({ 
             success: true,
-            token,
             user: {
                 id: user.id,
                 name: user.name,
