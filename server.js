@@ -10,7 +10,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 require('dotenv').config();
 
-// Configuración de la base de datos
+// Configuración de la base de datos como constante
 const dbConfig = {
     host: 'servicioalochoro-prueba1631.l.aivencloud.com',
     user: 'avnadmin',
@@ -20,25 +20,26 @@ const dbConfig = {
     charset: "utf8mb4"
 };
 
-// Middleware
+// Función helper para crear conexión a la base de datos
+const createDbConnection = async () => {
+    return await mysql.createConnection(dbConfig);
+};
+
+// Middleware optimizado
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
-
 
 // Ruta para la página de registro
 app.get('/signup', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'signup.html'));
 });
 
-// Ruta para el registro de usuarios
-// Ruta para el registro de usuarios
+// Ruta optimizada para el registro de usuarios
 app.post('/signup', async (req, res) => {
+    const connection = await createDbConnection();
     try {
-        const connection = await mysql.createConnection(dbConfig);
         const { name, email, phone, address, password } = req.body;
-        
-        // Generar salt y hash de la contraseña
         const saltRounds = 10;
         const salt = await bcryptjs.genSalt(saltRounds);
         const passwordHash = await bcryptjs.hash(password, salt);
@@ -48,16 +49,15 @@ app.post('/signup', async (req, res) => {
             [name, email, phone, address, passwordHash, salt]
         );
         
-        await connection.end();
-        
-        if (result.affectedRows === 1) {
-            res.json({ success: true, message: 'Cliente registrado correctamente' });
-        } else {
-            res.status(500).json({ success: false, message: 'Error al registrar cliente' });
-        }
+        res.json({ 
+            success: result.affectedRows === 1, 
+            message: result.affectedRows === 1 ? 'Cliente registrado correctamente' : 'Error al registrar cliente'
+        });
     } catch (error) {
         console.error('Error en el registro:', error);
         res.status(500).json({ success: false, message: 'Error en el servidor' });
+    } finally {
+        await connection.end();
     }
 });
 
@@ -66,12 +66,11 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'Login.html'));
 });
 
-// Ruta para el proceso de inicio de sesión
+// Ruta optimizada para el login
 app.post('/login', async (req, res) => {
+    const connection = await createDbConnection();
     try {
         const { email, password } = req.body;
-        
-        const connection = await mysql.createConnection(dbConfig);
         const [rows] = await connection.execute('SELECT * FROM clientes WHERE email = ?', [email]);
         
         if (rows.length === 0) {
@@ -79,8 +78,6 @@ app.post('/login', async (req, res) => {
         }
         
         const user = rows[0];
-        
-        // Verificación con bcryptjs
         const validPassword = await bcryptjs.compare(password, user.password_hash);
         
         if (!validPassword) {
@@ -98,6 +95,8 @@ app.post('/login', async (req, res) => {
     } catch (error) {
         console.error('Error en login:', error);
         res.status(500).json({ message: 'Error en el servidor' });
+    } finally {
+        await connection.end();
     }
 });
 
@@ -128,63 +127,48 @@ app.get('/api/Productos', async (req, res) => {
 
 
 
-async function testDatabaseConnection() {
+// Función helper para verificar tablas
+const checkTable = async (tableName, createTableSQL = null) => {
+    const connection = await createDbConnection();
     try {
-        const connection = await mysql.createConnection(dbConfig);
-        console.log('Conexión a la base de datos exitosa');
-        await connection.end();
+        const [rows] = await connection.execute(`DESCRIBE ${tableName}`);
+        console.log(`Estructura de la tabla ${tableName}:`, rows);
     } catch (error) {
-        console.error('Error al conectar a la base de datos:', error);
-    }
-}
-
-testDatabaseConnection();
-
-async function checkTableStructure() {
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.execute('DESCRIBE clientes');
-        console.log('Estructura de la tabla clientes:', rows);
-        await connection.end();
-    } catch (error) {
-        console.error('Error al verificar la estructura de la tabla:', error);
-    }
-}
-
-checkTableStructure();
-
-async function checkProductsTable() {
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.execute('DESCRIBE Productos');
-        console.log('Estructura de la tabla Productos:', rows);
-        await connection.end();
-    } catch (error) {
-        console.error('Error al verificar la tabla Productos:', error);
-        // Si la tabla no existe, la creamos
-        try {
-            const connection = await mysql.createConnection(dbConfig);
-            await connection.execute(`
-                CREATE TABLE IF NOT EXISTS Productos (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    name VARCHAR(100) NOT NULL,
-                    description TEXT,
-                    category VARCHAR(50),
-                    price DECIMAL(10,2) NOT NULL,
-                    stock INT DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            `);
-            console.log('Tabla Productos creada exitosamente');
-            await connection.end();
-        } catch (createError) {
-            console.error('Error al crear la tabla Productos:', createError);
+        console.error(`Error al verificar la tabla ${tableName}:`, error);
+        if (createTableSQL) {
+            try {
+                await connection.execute(createTableSQL);
+                console.log(`Tabla ${tableName} creada exitosamente`);
+            } catch (createError) {
+                console.error(`Error al crear la tabla ${tableName}:`, createError);
+            }
         }
+    } finally {
+        await connection.end();
     }
-}
+};
 
-// Llamar a la función de verificación al iniciar el servidor
-checkProductsTable();
+// Inicialización de la base de datos
+const initDatabase = async () => {
+    await createDbConnection()
+        .then(() => console.log('Conexión a la base de datos exitosa'))
+        .catch(error => console.error('Error al conectar a la base de datos:', error));
+
+    await checkTable('clientes');
+    await checkTable('Productos', `
+        CREATE TABLE IF NOT EXISTS Productos (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            description TEXT,
+            category VARCHAR(50),
+            price DECIMAL(10,2) NOT NULL,
+            stock INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+};
+
+initDatabase();
 
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
