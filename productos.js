@@ -24,7 +24,7 @@ async function cargarProductos() {
             const imgSrc = `data:image/jpeg;base64,${producto.imagen}`;
             const imgElement = document.createElement('img');
             imgElement.src = imgSrc;
-            imgElement.className = 'card-img-top';
+            imgElement.className = 'product-card-img'; // Añade la clase CSS aquí
             imgElement.alt = producto.name;
             imgElement.onerror = function() {
                 console.error(`Error al cargar la imagen para el producto: ${producto.name}`);
@@ -35,7 +35,7 @@ async function cargarProductos() {
             };
 
             card.innerHTML = `
-                <div class="card">
+                <div class="card product-card"> <!-- Añade la clase CSS aquí -->
                     <div class="card-body">
                         <h5 class="card-title">${producto.name}</h5>
                         <p class="card-text">${producto.description}</p>
