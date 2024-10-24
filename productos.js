@@ -6,40 +6,59 @@ document.addEventListener('DOMContentLoaded', function() {
 async function cargarProductos() {
     try {
         console.log('Intentando obtener productos...');
-        const response = await fetch('https://reciclothes.onrender.com/api/productos');  // URL completa
+        const response = await fetch('https://reciclothes.onrender.com/api/productos');
         console.log('Respuesta recibida:', response);
         const productos = await response.json();
         console.log('Productos obtenidos:', productos);
         
-        const tbody = document.getElementById('productosBody');
-        if (!tbody) {
-            console.error('No se encontró el elemento productosBody');
+        const productosContainer = document.getElementById('productosContainer');
+        if (!productosContainer) {
+            console.error('No se encontró el elemento productosContainer');
             return;
         }
-        
-        tbody.innerHTML = ''; // Limpiar tabla
+        productosContainer.innerHTML = ''; // Limpiar contenedor
 
         productos.forEach(producto => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${producto.name}</td>
-                <td>${producto.description}</td>
-                <td>${producto.category}</td>
-                <td>$${producto.price.toLocaleString('es-CL')}</td>
-                <td>${producto.stock}</td>
+            const card = document.createElement('div');
+            card.className = 'col-md-4 mb-4';
+            const imgSrc = `data:image/jpeg;base64,${producto.imagen}`;
+            const imgElement = document.createElement('img');
+            imgElement.src = imgSrc;
+            imgElement.className = 'card-img-top';
+            imgElement.alt = producto.name;
+            imgElement.onerror = function() {
+                console.error(`Error al cargar la imagen para el producto: ${producto.name}`);
+                this.src = 'media/polera.png';
+            };
+            imgElement.onload = function() {
+                console.log(`Imagen cargada correctamente para el producto: ${producto.name}`);
+            };
+
+            card.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">${producto.name}</h5>
+                        <p class="card-text">${producto.description}</p>
+                        <p class="card-text"><strong>Precio: $${producto.price.toLocaleString('es-CL')}</strong></p>
+                        <p class="card-text">Categoría: ${producto.category}</p>
+                        <p class="card-text">Stock: ${producto.stock}</p>
+                        <button class="btn btn-primary">Agregar al carrito</button>
+                    </div>
+                </div>
             `;
-            tbody.appendChild(row);
+            card.querySelector('.card').insertBefore(imgElement, card.querySelector('.card-body'));
+            productosContainer.appendChild(card);
         });
     } catch (error) {
         console.error('Error detallado:', error);
-        const tbody = document.getElementById('productosBody');
-        if (tbody) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="text-center text-danger">
+        const productosContainer = document.getElementById('productosContainer');
+        if (productosContainer) {
+            productosContainer.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-danger" role="alert">
                         Error al cargar los productos. Por favor, intente más tarde.
-                    </td>
-                </tr>
+                    </div>
+                </div>
             `;
         }
     }

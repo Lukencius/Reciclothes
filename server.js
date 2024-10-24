@@ -1,13 +1,11 @@
 const express = require('express');
-const cors = require('cors');
-const bcryptjs = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-// const { Pool } = require('pg');
-const path = require('path');
 const mysql = require('mysql2/promise');
+const path = require('path');
+const bcrypt = require('bcrypt');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 3000;
 require('dotenv').config();
 
 // Configuración de la base de datos
@@ -31,7 +29,6 @@ app.get('/signup', (req, res) => {
 });
 
 // Ruta para el registro de usuarios
-// Ruta para el registro de usuarios
 app.post('/signup', async (req, res) => {
     try {
         const connection = await mysql.createConnection(dbConfig);
@@ -39,8 +36,8 @@ app.post('/signup', async (req, res) => {
         
         // Generar salt y hash de la contraseña
         const saltRounds = 10;
-        const salt = await bcryptjs.genSalt(saltRounds);
-        const passwordHash = await bcryptjs.hash(password, salt);
+        const salt = await bcrypt.genSalt(saltRounds);
+        const passwordHash = await bcrypt.hash(password, salt);
         
         const [result] = await connection.execute(
             'INSERT INTO clientes (name, email, phone, address, password_hash, salt) VALUES (?, ?, ?, ?, ?, ?)',
@@ -62,63 +59,41 @@ app.post('/signup', async (req, res) => {
 
 // Ruta para la página de inicio de sesión
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'Login.html'));
+    res.sendFile(path.join(__dirname, 'public', 'LogIn.html'));
 });
 
 // Ruta para el proceso de inicio de sesión
 app.post('/login', async (req, res) => {
     try {
+        const connection = await mysql.createConnection(dbConfig);
         const { email, password } = req.body;
         
-        const connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.execute('SELECT * FROM clientes WHERE email = ?', [email]);
+        // Buscar el usuario por email
+        const [rows] = await connection.execute(
+            'SELECT * FROM clientes WHERE email = ?',
+            [email]
+        );
+        
+        await connection.end();
         
         if (rows.length === 0) {
-            return res.status(401).json({ message: 'Usuario no encontrado' });
+            return res.status(400).json({ success: false, message: 'Usuario no encontrado' });
         }
         
         const user = rows[0];
         
-        // Verificación con bcryptjs
-        const validPassword = await bcryptjs.compare(password, user.password_hash);
+        // Verificar la contraseña
+        const isMatch = await bcrypt.compare(password, user.password_hash);
         
-        if (!validPassword) {
-            return res.status(401).json({ message: 'Contraseña incorrecta' });
+        if (isMatch) {
+            // Aquí puedes generar un token de sesión si lo deseas
+            res.json({ success: true, message: 'Inicio de sesión exitoso' });
+        } else {
+            res.status(400).json({ success: false, message: 'Contraseña incorrecta' });
         }
-        
-        res.json({ 
-            success: true,
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email
-            }
-        });
     } catch (error) {
-        console.error('Error en login:', error);
-        res.status(500).json({ message: 'Error en el servidor' });
-    }
-});
-
-// Ruta para obtener todos los productos
-app.get('/api/productos', async (req, res) => {
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        console.log('Conexión a base de datos establecida');
-        
-        const [rows] = await connection.execute('SELECT * FROM Productos');
-        console.log('Productos encontrados:', rows);
-        
-        await connection.end();
-        
-        res.json(rows);
-    } catch (error) {
-        console.error('Error en el servidor:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al obtener los productos',
-            error: error.message 
-        });
+        console.error('Error en el inicio de sesión:', error);
+        res.status(500).json({ success: false, message: 'Error en el servidor' });
     }
 });
 
@@ -147,38 +122,34 @@ async function checkTableStructure() {
 
 checkTableStructure();
 
-async function checkProductsTable() {
+// Importar el módulo de base de datos (asegúrate de tenerlo configurado)
+const db = require('./db');
+
+// Ruta para obtener todos los productos
+app.get('/api/Productos', async (req, res) => {
     try {
         const connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.execute('DESCRIBE Productos');
-        console.log('Estructura de la tabla Productos:', rows);
+        const [rows] = await connection.execute('SELECT Id_Producto, name, description, price, category, stock, imagen FROM Productos');
         await connection.end();
-    } catch (error) {
-        console.error('Error al verificar la tabla Productos:', error);
-        // Si la tabla no existe, la creamos
-        try {
-            const connection = await mysql.createConnection(dbConfig);
-            await connection.execute(`
-                CREATE TABLE IF NOT EXISTS Productos (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    name VARCHAR(100) NOT NULL,
-                    description TEXT,
-                    category VARCHAR(50),
-                    price DECIMAL(10,2) NOT NULL,
-                    stock INT DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            `);
-            console.log('Tabla Productos creada exitosamente');
-            await connection.end();
-        } catch (createError) {
-            console.error('Error al crear la tabla Productos:', createError);
-        }
-    }
-}
 
-// Llamar a la función de verificación al iniciar el servidor
-checkProductsTable();
+        // Convertir BLOB a base64
+        const productosConImagenes = rows.map(producto => ({
+            ...producto,
+            imagen: producto.imagen ? producto.imagen.toString('base64') : null
+        }));
+
+        res.json(productosConImagenes);
+    } catch (error) {
+        console.error('Error al obtener los productos:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+app.get('/api/Productos', async (req, res) => {
+    console.log('Solicitud recibida en /api/productos');
+    // ... resto del código ...
+});
+
 
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
