@@ -246,3 +246,34 @@ h1, h2, h3, h4, h5, h6 {
 body{
     font-family: "Times New Roman", Times, serif;
 }
+
+
+.product-card {
+    width: 220px; /* Establece un ancho fijo para la carta */
+    margin: 0 auto; /* Centra la carta horizontalmente */
+    border: 1px solid #ddd; /* Añade un borde a la carta */
+    border-radius: 5px; /* Redondea las esquinas de la carta */
+    overflow: hidden; /* Oculta el desbordamiento */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Añade una sombra para un efecto de elevación */
+}
+
+.product-card-img {
+    width: 100%; /* Ajusta el ancho al 100% del contenedor */
+    height: 150px; /* Establece una altura fija para la imagen */
+    object-fit: cover; /* Asegura que la imagen cubra el área sin distorsión */
+}
+
+.card-body {
+    padding: 10px; /* Añade padding al cuerpo de la carta */
+}
+
+.card-title {
+    font-size: 1.1em; /* Ajusta el tamaño de la fuente del título */
+    margin-bottom: 5px; /* Añade un margen inferior al título */
+}
+
+.card-text {
+    font-size: 0.9em; /* Ajusta el tamaño de la fuente del texto */
+    margin-bottom: 5px; /* Añade un margen inferior al texto */
+}
+
