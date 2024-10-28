@@ -66,7 +66,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'Login.html'));
 });
 
-// Ruta optimizada para el login
+// Añadir una clave secreta para JWT
+const JWT_SECRET = process.env.JWT_SECRET || 'clave_secreta_temporal';
+
+// Actualizar la ruta de login
 app.post('/login', async (req, res) => {
     const connection = await createDbConnection();
     try {
@@ -83,9 +86,17 @@ app.post('/login', async (req, res) => {
         if (!validPassword) {
             return res.status(401).json({ message: 'Contraseña incorrecta' });
         }
+
+        // Generar token JWT
+        const token = jwt.sign(
+            { id: user.id, email: user.email, name: user.name },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
         
         res.json({ 
             success: true,
+            token,
             user: {
                 id: user.id,
                 name: user.name,
@@ -169,6 +180,29 @@ const initDatabase = async () => {
 };
 
 initDatabase();
+
+// Middleware para verificar token
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ message: 'Token no proporcionado' });
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.status(403).json({ message: 'Token inválido' });
+        }
+        req.user = user;
+        next();
+    });
+};
+
+// Ejemplo de ruta protegida
+app.get('/api/user-profile', authenticateToken, async (req, res) => {
+    res.json({ user: req.user });
+});
 
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);

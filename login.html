@@ -60,9 +60,11 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    localStorage.setItem('token', data.token);
+                    // Guardar token y datos del usuario
+                    localStorage.setItem('userToken', data.token);
+                    localStorage.setItem('userData', JSON.stringify(data.user));
                     
-                    // Comprobamos si el email es el del admin
+                    // Verificar si es admin
                     if (email.toLowerCase() === 'jimena@admin.com') {
                         const adminToken = btoa(Date.now() + '-admin-' + Math.random());
                         localStorage.setItem('adminToken', adminToken);
@@ -79,6 +81,24 @@
                 alert('Error al conectar con el servidor');
             }
         });
+
+        // Función para verificar si ya hay una sesión activa
+        function checkExistingSession() {
+            const token = localStorage.getItem('userToken');
+            const userData = localStorage.getItem('userData');
+            
+            if (token && userData) {
+                const user = JSON.parse(userData);
+                if (user.email === 'jimena@admin.com') {
+                    window.location.href = 'admin.html?token=' + localStorage.getItem('adminToken');
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }
+        }
+
+        // Verificar sesión al cargar la página
+        window.onload = checkExistingSession;
     </script>
 </body>
 </html>
