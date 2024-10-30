@@ -203,3 +203,25 @@ app.get('/api/user-profile', authenticateToken, async (req, res) => {
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
 });
+
+// Ruta para obtener un producto específico por ID
+app.get('/api/productos/:id', async (req, res) => {
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute(
+            'SELECT Id_Producto, name, description, price, category, stock, imagen FROM Productos WHERE Id_Producto = ?',
+            [req.params.id]
+        );
+        await connection.end();
+
+        if (rows.length === 0) {
+            res.status(404).json({ error: 'Producto no encontrado' });
+            return;
+        }
+
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('Error al obtener el producto:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});

@@ -38,6 +38,7 @@ async function cargarProductos() {
                             <p class="card-text"><strong>Precio: $${producto.price.toLocaleString('es-CL')}</strong></p>
                             <p class="card-text">Categoría: ${producto.category}</p>
                             <p class="card-text">Stock: ${producto.stock}</p>
+                            <p class="card-text">ID: ${producto.Id_Producto}</p>
                         </div>
                     </div>
                 </div>
@@ -65,6 +66,48 @@ async function cargarProductos() {
         `;
         // Mostrar mensaje de error al usuario
         if (productosContainer) productosContainer.innerHTML = errorHTML;
+    }
+}
+
+async function agregarAlCarrito(productoId) {
+    try {
+        // Obtener los datos del producto desde el servidor
+        const response = await fetch(`https://reciclothes.onrender.com/api/productos/${productoId}`);
+        const producto = await response.json();
+        
+        if (!producto) {
+            throw new Error('Producto no encontrado');
+        }
+
+        // Obtener carrito actual o iniciar uno nuevo
+        let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        
+        // Buscar si el producto ya existe
+        let productoEnCarrito = carrito.find(item => item.Id_Producto === parseInt(productoId));
+        
+        if (productoEnCarrito) {
+            // Si existe, solo aumentar cantidad
+            productoEnCarrito.cantidad += 1;
+        } else {
+            // Si no existe, agregar nuevo producto
+            carrito.push({
+                Id_Producto: parseInt(productoId),
+                name: producto.name,
+                price: producto.price,
+                imagen: producto.imagen,
+                cantidad: 1
+            });
+        }
+        
+        // Guardar carrito actualizado
+        localStorage.setItem('carrito', JSON.stringify(carrito));
+        
+        // Notificar al usuario
+        alert('Producto agregado al carrito');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al agregar el producto al carrito');
     }
 }
 

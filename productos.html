@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="icon" href="media/ReciClothes_sinf.png">
+    <script src="productos.js" defer></script>
 </head>
 <body style="background-image: url('https://treenewal.com/wp-content/uploads/2020/11/environmental_factors_affecting_trees.png'); 
             background-size: cover; 
@@ -82,7 +83,8 @@
                     <div class="precio mb-4">
                         <h3>Precio: $<span id="productoPrecio"></span></h3>
                     </div>
-                    <button class="btn btn-success btn-lg">
+                    <input type="hidden" id="productoId">
+                    <button class="btn btn-success btn-lg" onclick="agregarAlCarrito(document.getElementById('productoId').value)">
                         <i class="bi bi-cart-plus"></i> Agregar al carrito
                     </button>
                 </div>
@@ -155,12 +157,7 @@
                 document.getElementById('productoTitulo').textContent = producto.name;
                 document.getElementById('productoDescripcion').textContent = producto.description;
                 document.getElementById('productoPrecio').textContent = producto.price.toLocaleString('es-CL');
-                
-                // Limpiar el localStorage después de usar los datos
-                localStorage.removeItem('productoSeleccionado');
-            } else {
-                // Si no hay producto seleccionado, redirigir a la página principal
-                window.location.href = 'index.html';
+                document.getElementById('productoId').value = producto.Id_Producto; // Asignar el ID al input oculto
             }
 
             // Ejecutar cuando se carga la página
