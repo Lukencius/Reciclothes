@@ -255,6 +255,12 @@ body{
     border-radius: 5px; /* Redondea las esquinas de la carta */
     overflow: hidden; /* Oculta el desbordamiento */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Añade una sombra para un efecto de elevación */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .product-card-img {
@@ -275,5 +281,33 @@ body{
 .card-text {
     font-size: 0.9em; /* Ajusta el tamaño de la fuente del texto */
     margin-bottom: 5px; /* Añade un margen inferior al texto */
+}
+
+.product-image-container {
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.product-image-container img {
+    max-height: 400px;
+    object-fit: contain;
+}
+
+.product-details {
+    padding: 30px;
+    margin: 20px 0;
+}
+
+.min-vh-75 {
+    min-height: 75vh;
+}
+
+/* Agregar al final del archivo */
+.productos-page {
+    background-image: url('https://treenewal.com/wp-content/uploads/2020/11/environmental_factors_affecting_trees.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
 }
 
