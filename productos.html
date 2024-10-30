@@ -110,6 +110,40 @@
     </footer>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Función para actualizar el botón de login
+            function actualizarBotonLogin() {
+                const userData = localStorage.getItem('userData');
+                const loginButton = document.getElementById('loginButton');
+                
+                if (userData) {
+                    const user = JSON.parse(userData);
+                    loginButton.innerHTML = `<span class="d-none d-md-inline">Sesión: ${user.name}</span><span class="d-md-none"><i class="bi bi-person-check"></i></span>`;
+                    loginButton.href = '#';
+                    
+                    // Agregar menú desplegable para cerrar sesión
+                    loginButton.classList.add('dropdown-toggle');
+                    loginButton.setAttribute('data-bs-toggle', 'dropdown');
+                    
+                    // Crear el menú desplegable
+                    const dropdownMenu = document.createElement('ul');
+                    dropdownMenu.className = 'dropdown-menu dropdown-menu-end';
+                    dropdownMenu.innerHTML = `
+                        <li><a class="dropdown-item" href="#" onclick="cerrarSesion()">Cerrar sesión</a></li>
+                    `;
+                    
+                    // Agregar el menú después del botón
+                    loginButton.parentNode.appendChild(dropdownMenu);
+                }
+            }
+
+            // Función para cerrar sesión
+            function cerrarSesion() {
+                localStorage.removeItem('userToken');
+                localStorage.removeItem('userData');
+                localStorage.removeItem('adminToken');
+                window.location.reload();
+            }
+
             // Recuperar el producto del localStorage
             const productoString = localStorage.getItem('productoSeleccionado');
             if (productoString) {
@@ -128,6 +162,9 @@
                 // Si no hay producto seleccionado, redirigir a la página principal
                 window.location.href = 'index.html';
             }
+
+            // Ejecutar cuando se carga la página
+            actualizarBotonLogin();
         });
     </script>
 </body>
