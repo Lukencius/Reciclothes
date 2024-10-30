@@ -72,7 +72,7 @@
         <div class="row justify-content-center align-items-center min-vh-75">
             <div class="col-md-5">
                 <div class="product-image-container text-center rounded p-4" style="background-color: rgba(170, 175, 180, 0.486);">
-                    <img id="productoImagen" src="" alt="Imagen del producto" class="img-fluid rounded shadow">
+                    <img id="productoImagen" src="" alt="Imagen del producto" class="img-fluid rounded shadow" onerror="this.src='media/polera.png'">
                 </div>
             </div>
             <div class="col-md-5">
@@ -116,7 +116,7 @@
                 const producto = JSON.parse(productoString);
                 
                 // Actualizar los elementos de la página con la información del producto
-                document.getElementById('productoImagen').src = `data:image/jpeg;base64,${producto.imagen}`;
+                document.getElementById('productoImagen').src = producto.imagen || 'media/polera.png';
                 document.getElementById('productoImagen').alt = producto.name;
                 document.getElementById('productoTitulo').textContent = producto.name;
                 document.getElementById('productoDescripcion').textContent = producto.description;

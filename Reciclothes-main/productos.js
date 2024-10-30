@@ -25,10 +25,8 @@ async function cargarProductos() {
         
         // Generar el HTML para todos los productos usando template literals
         const productosHTML = productos.map(producto => {
-            // Usar imagen por defecto si no hay imagen del producto
-            const imgSrc = producto.imagen ? 
-                `data:image/jpeg;base64,${producto.imagen}` : 
-                'media/polera.png';
+            // Usar imagen por defecto si no hay URL de imagen
+            const imgSrc = producto.imagen || 'media/polera.png';
             
             return `
                 <div class="col-md-4 mb-4">
@@ -45,7 +43,6 @@ async function cargarProductos() {
                 </div>
             `;
         }).join(''); // Unir todos los elementos en una sola cadena HTML
-        
         // Insertar todos los productos en el DOM de una sola vez
         productosContainer.innerHTML = productosHTML;
 

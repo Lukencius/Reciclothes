@@ -118,13 +118,8 @@ app.get('/api/Productos', async (req, res) => {
         const [rows] = await connection.execute('SELECT Id_Producto, name, description, price, category, stock, imagen FROM Productos');
         await connection.end();
 
-        // Convertir BLOB a base64
-        const productosConImagenes = rows.map(producto => ({
-            ...producto,
-            imagen: producto.imagen ? producto.imagen.toString('base64') : null
-        }));
-
-        res.json(productosConImagenes);
+        // Ya no es necesario convertir BLOB a base64
+        res.json(rows);
     } catch (error) {
         console.error('Error al obtener los productos:', error);
         res.status(500).json({ error: 'Error interno del servidor' });
@@ -174,6 +169,7 @@ const initDatabase = async () => {
             category VARCHAR(50),
             price DECIMAL(10,2) NOT NULL,
             stock INT DEFAULT 0,
+            imagen VARCHAR(500),  // Cambiado de BLOB a VARCHAR para almacenar URLs
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
