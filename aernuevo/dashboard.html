@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ReciClothes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="style/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <div class="logo-img">
+                    <img src="img/logo.png" alt="ReciCLothes Logo" class="logo-img">
+                    <h2>ReciClothes</h2>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+                    <li><a href="productos.html"><i class="fas fa-tshirt"></i> <span>Productos</span></a></li>
+                    <li><a href="ventas.html"><i class="fas fa-dollar-sign"></i> <span>Ventas</span></a></li>
+                    <li><a href="pedidos.html"><i class="fas fa-shopping-cart"></i> <span>Pedidos</span></a></li>
+                    <li><a href="tienda.html"><i class="fas fa-store"></i> <span>Tienda</span></a></li>
+                    <li><a href="clientes.html"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <ul>
+                    <li><a href="ajustes.html"><i class="fas fa-cog"></i> <span>Ajustes</span></a></li>
+                    <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> <span>Cerrar sesión</span></a></li>
+                </ul>
+            </div>
+        </nav>
+        <main>
+            <h1 class="page-title">Gestión de Ventas</h1>
+            <div class="graficos">
+                <div class="grafico">
+                    <h2>Ventas Sostenibles por Mes</h2>
+                    <canvas id="grafico-ventas-mes"></canvas>
+                </div>
+                <div class="grafico">
+                    <h2>Productos Ecológicos Más Vendidos</h2>
+                    <canvas id="grafico-productos-vendidos"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/main.js"></script>
+    <script src="js/graficos.js"></script>
+</body>
+</html>
