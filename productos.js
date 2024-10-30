@@ -38,7 +38,7 @@ async function cargarProductos() {
                             <p class="card-text"><strong>Precio: $${producto.price.toLocaleString('es-CL')}</strong></p>
                             <p class="card-text">Categoría: ${producto.category}</p>
                             <p class="card-text">Stock: ${producto.stock}</p>
-                            <p class="card-text">ID: ${producto.Id_Producto}</p>
+                            // <p class="card-text">ID: ${producto.Id_Producto}</p>
                         </div>
                     </div>
                 </div>
