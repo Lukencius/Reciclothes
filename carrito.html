@@ -15,12 +15,51 @@
             background-position: center; 
             background-attachment: fixed; 
             background-repeat: no-repeat;">
-    
-    <!-- Header igual al de productos.html -->
     <header class="bg-success py-2">
-        <!-- Copiar el header de productos.html -->
+        <div class="leaves-container">
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+        </div>
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <a href="index.html" class="text-white text-decoration-none d-flex align-items-center">
+                        <img src="media/ReciClothes_sinf.png" width="60" height="60" class="d-inline-block align-top me-2" alt="Reciclothes logo">
+                        <span class="fs-5 fw-bold custom-font">Reciclothes</span>
+                    </a>
+                </div>
+                <div class="col">
+                    <div class="dropdown">
+                        <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Categorías
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <li><a class="dropdown-item" href="productos.html?categoria=mujeres">Mujeres</a></li>
+                            <li><a class="dropdown-item" href="productos.html?categoria=ninos">Niños</a></li>
+                            <li><a class="dropdown-item" href="productos.html?categoria=hombres">Hombres</a></li>
+                            <li><a class="dropdown-item" href="productos.html?categoria=accesorios">Accesorios</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-auto ms-auto">
+                    <a href="carrito.html" class="btn btn-success me-2">
+                        <i class="bi bi-cart"></i>
+                    </a>
+                    <a href="login.html" class="btn btn-success" id="loginButton">
+                        <i class="bi bi-person"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </header>
-
     <main class="container mt-5">
         <div class="row">
             <div class="col-12">
@@ -51,12 +90,39 @@
             </div>
         </div>
     </main>
-
-    <!-- Footer igual al de productos.html -->
-    <footer class="bg-dark text-white py-4 mt-5">
-        <!-- Copiar el footer de productos.html -->
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h3>Contacto</h3>
+                    <p>Email: Reciclothes@gmail.com</p>
+                    <p>Teléfono: +569666666</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h3>Síguenos</h3>
+                    <a href="#" class="text-white d-block mb-2">Facebook</a>
+                    <a href="#" class="text-white d-block mb-2">Instagram</a>
+                    <a href="#" class="text-white d-block mb-2">Twitter</a>
+                </div>
+            </div>
+            <hr>
+            <p class="text-center mb-0">&copy; 2024 Reciclothes. Todos los derechos reservados.</p>
+        </div>
     </footer>
-
     <script>
         // Función para cargar el carrito
         function cargarCarrito() {
@@ -72,10 +138,8 @@
                 carritoItems.innerHTML = '';
                 return;
             }
-
             carritoVacio.style.display = 'none';
             carritoResumen.style.display = 'flex';
-            
             let total = 0;
             carritoItems.innerHTML = carrito.map(item => {
                 total += item.price * item.cantidad;

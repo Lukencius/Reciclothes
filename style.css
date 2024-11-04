@@ -304,10 +304,18 @@ body{
 
 /* Agregar al final del archivo */
 .productos-page {
-    background-image: url('https://treenewal.com/wp-content/uploads/2020/11/environmental_factors_affecting_trees.png');
+    background-image: url('media/FONDOPRODUCTOS.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
     background-repeat: no-repeat;
+}
+
+.product-details .lead {
+    color: white;
+}
+
+.product-details .precio h3 {
+    color: white;
 }
 

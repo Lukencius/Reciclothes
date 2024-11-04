@@ -13,11 +13,7 @@
     <link rel="icon" href="media/ReciClothes_sinf.png">
     <script src="productos.js" defer></script>
 </head>
-<body style="background-image: url('https://treenewal.com/wp-content/uploads/2020/11/environmental_factors_affecting_trees.png'); 
-            background-size: cover; 
-            background-position: center; 
-            background-attachment: fixed; 
-            background-repeat: no-repeat;">
+<body class="productos-page">
     <header class="bg-success py-2">
         <div class="leaves-container">
             <div class="leaf"></div>
@@ -71,25 +67,36 @@
     </header>
     <main class="container mt-5">
         <div class="row justify-content-center align-items-center min-vh-75">
-            <div class="col-md-5">
-                <div class="product-image-container text-center rounded p-4" style="background-color: rgba(170, 175, 180, 0.486);">
-                    <img id="productoImagen" src="" alt="Imagen del producto" class="img-fluid rounded shadow" onerror="this.src='media/polera.png'">
-                </div>
-            </div>
-            <div class="col-md-5">
-                <div class="product-details rounded p-4" style="background-color: rgba(197, 198, 199, 0.486);">
-                    <h2 id="productoTitulo" class="mb-4"></h2>
-                    <p id="productoDescripcion" class="lead mb-4"></p>
-                    <div class="precio mb-4">
-                        <h3>Precio: $<span id="productoPrecio"></span></h3>
+            <div class="col-md-10">
+                <div class="product-container rounded p-4" style="background-color: rgba(45, 49, 53, 0.808);">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="product-image-container text-center">
+                                <img id="productoImagen" src="" alt="Imagen del producto" class="img-fluid rounded shadow" onerror="this.src='media/polera.png'">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="product-details d-flex flex-column" style="height: 100%;">
+                                <div>
+                                    <h2 id="productoTitulo" class="mb-4" style="color: #198754;"></h2>
+                                    <p id="productoDescripcion" class="lead mb-4" style="color: white;"></p>
+                                    <div class="precio mb-4">
+                                        <h3 style="color: white;">Precio: $<span id="productoPrecio"></span></h3>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="productoId">
+                                <div class="mt-auto">
+                                    <button class="btn btn-success btn-lg" onclick="agregarAlCarrito(document.getElementById('productoId').value)">
+                                        <i class="bi bi-cart-plus"></i> Agregar al carrito
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <input type="hidden" id="productoId">
-                    <button class="btn btn-success btn-lg" onclick="agregarAlCarrito(document.getElementById('productoId').value)">
-                        <i class="bi bi-cart-plus"></i> Agregar al carrito
-                    </button>
                 </div>
             </div>
         </div>
+        <br>
     </main>
     <footer class="bg-dark text-white py-4">
         <div class="container">
@@ -137,7 +144,6 @@
                     loginButton.parentNode.appendChild(dropdownMenu);
                 }
             }
-
             // Función para cerrar sesión
             function cerrarSesion() {
                 localStorage.removeItem('userToken');
@@ -145,21 +151,23 @@
                 localStorage.removeItem('adminToken');
                 window.location.reload();
             }
-
             // Recuperar el producto del localStorage
             const productoString = localStorage.getItem('productoSeleccionado');
             if (productoString) {
                 const producto = JSON.parse(productoString);
-                
                 // Actualizar los elementos de la página con la información del producto
                 document.getElementById('productoImagen').src = producto.imagen || 'media/polera.png';
                 document.getElementById('productoImagen').alt = producto.name;
                 document.getElementById('productoTitulo').textContent = producto.name;
                 document.getElementById('productoDescripcion').textContent = producto.description;
                 document.getElementById('productoPrecio').textContent = producto.price.toLocaleString('es-CL');
-                document.getElementById('productoId').value = producto.Id_Producto; // Asignar el ID al input oculto
+                document.getElementById('productoId').value = producto.Id_Producto; // Agregar esta línea
+                // Limpiar el localStorage después de usar los datos
+                localStorage.removeItem('productoSeleccionado');
+            } else {
+                // Si no hay producto seleccionado, redirigir a la página principal
+                window.location.href = 'index.html';
             }
-
             // Ejecutar cuando se carga la página
             actualizarBotonLogin();
         });
