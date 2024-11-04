@@ -225,3 +225,8 @@ app.get('/api/productos/:id', async (req, res) => {
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
+
+// Agregar ruta de ping simple
+app.get('/ping', (req, res) => {
+    res.status(200).send('pong');
+});
