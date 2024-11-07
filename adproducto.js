@@ -471,6 +471,38 @@ function updateSearchResults(found, total, query) {
     resultsDiv.style.display = query ? 'block' : 'none';
 }
 
+// Función para subir imagen a Cloudinary
+function uploadImageToCloudinary() {
+    const fileInput = document.getElementById('productImageFile');
+    const file = fileInput.files[0];
+    if (!file) {
+        alert('Por favor, selecciona una imagen para subir.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'pruebas_reciclothes'); // Reemplaza con tu upload preset de Cloudinary
+
+    fetch('https://api.cloudinary.com/v1_1/dvyrnjwfi/image/upload', { // Reemplaza con tu cloud name
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.secure_url) {
+            document.getElementById('productImage').value = data.secure_url;
+            alert('Imagen subida con éxito.');
+        } else {
+            alert('Error al subir la imagen.');
+        }
+    })
+    .catch(error => {
+        console.error('Error al subir la imagen:', error);
+        alert('Error al subir la imagen.');
+    });
+}
+
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
     // Cargar productos al iniciar
