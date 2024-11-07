@@ -3,110 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReciClothes - Administración de Datos</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .sidebar {
-            background-color: #e8f5e9;
-        }
-        .product-image {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-        }
-        @media (max-width: 768px) {
-            .sidebar {
-                margin-bottom: 20px;
-            }
-        }
-    </style>
+    <title>Dashboard - ReciClothes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="adstyle.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <div id="content" style="display: none;">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-3 col-lg-2 sidebar p-3">
-                    <div class="text-center mb-4">
-                        <img src="https://cdn.discordapp.com/attachments/844291608010817559/1295430676350373970/ReciClothes_sinf.png?ex=6711eb15&is=67109995&hm=2f6e98ae58ed5ef6ce6858633926b9602de08855757e22d7c0f4cdc06cd01003&" alt="ReciClothes Logo" class="img-fluid mb-2">
-                        <h2>ReciClothes</h2>
-                    </div>
-                    <ul class="nav flex-column">
-                        <li class="nav-item"><a class="nav-link" href="#">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Productos</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Pedidos</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Tienda</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Clientes</a></li>
-                        <li class="nav-item"><a class="nav-link active" href="#"><strong>Inventario</strong></a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Ajustes</a></li>
-                    </ul>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <div class="logo-img">
+                    <img src="media\ReciClothes_sinf.png" alt="ReciCLothes Logo" class="logo-img">
+                    <h2>ReciClothes</h2>
                 </div>
-                <main class="col-md-9 col-lg-10 p-4">
-                    <h1 class="mb-4">Administración de Datos</h1>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>Category</th>
-                                    <th>Price</th>
-                                    <th>Stock</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><img src="https://media.vogue.mx/photos/62d551152befad2e516f3660/master/w_1600,c_limit/Arket.png" alt="Shorts" class="product-image me-2"> Shorts</td>
-                                    <td>Shorts de mezclilla</td>
-                                    <td>Pantalones</td>
-                                    <td>$29.99</td>
-                                    <td>50</td>
-                                </tr>
-                                <tr>
-                                    <td><img src="https://hmchile.vtexassets.com/arquivos/ids/5622058-483-725?v=638322076030700000&width=483&height=725&aspect=true" alt="Jeans" class="product-image me-2"> Jeans</td>
-                                    <td>Jeans clásicos</td>
-                                    <td>Pantalones</td>
-                                    <td>$39.99</td>
-                                    <td>30</td>
-                                </tr>
-                                <tr>
-                                    <td><img src="https://nikeclprod.vtexassets.com/arquivos/ids/1119007-1200-1200?v=638641749391130000&width=1200&height=1200&aspect=true" alt="Sneakers" class="product-image me-2"> Sneakers</td>
-                                    <td>Zapatillas deportivas</td>
-                                    <td>Calzado</td>
-                                    <td>$59.99</td>
-                                    <td>25</td>
-                                </tr>
-                                <tr>
-                                    <td><img src="https://hmchile.vtexassets.com/arquivos/ids/6071929-483-725?v=638471155011530000&width=483&height=725&aspect=true" alt="T-shirt" class="product-image me-2"> Camiseta</td>
-                                    <td>Camiseta básica</td>
-                                    <td>Tops</td>
-                                    <td>$19.99</td>
-                                    <td>100</td>
-                                </tr>
-                                <tr>
-                                    <td><img src="https://hmchile.vtexassets.com/arquivos/ids/5900759-483-725?v=638404644527330000&width=483&height=725&aspect=true" alt="Jacket" class="product-image me-2"> Chaqueta</td>
-                                    <td>Chaqueta de mezclilla</td>
-                                    <td>Abrigos</td>
-                                    <td>$69.99</td>
-                                    <td>15</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </main>
             </div>
-        </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li><a href="admin.html" class="active"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+                    <li><a href="adproductos.html"><i class="fas fa-tshirt"></i> <span>Productos</span></a></li>
+                    <li><a href="adventas.html"><i class="fas fa-dollar-sign"></i> <span>Ventas</span></a></li>
+                    <li><a href="adpedidos.html"><i class="fas fa-shopping-cart"></i> <span>Pedidos</span></a></li>
+                    <li><a href="adtienda.html"><i class="fas fa-store"></i> <span>Tienda</span></a></li>
+                    <li><a href="adclientes.html"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <ul>
+                    <li><a href="adajustes.html"><i class="fas fa-cog"></i> <span>Ajustes</span></a></li>
+                    <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> <span>Cerrar sesión</span></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="main-content" id="content" style="display: none;">
+            <div class="dashboard-header">
+                <div class="welcome-section">
+                    <h1>Bienvenida, <span id="adminName">Jimena</span></h1>
+                    <p class="date-time" id="currentDateTime"></p>
+                </div>
+                <div class="quick-actions">
+                    <button class="action-btn" onclick="location.href='adpedidos.html'">
+                        <i class="fas fa-plus"></i> Nuevo Pedido
+                    </button>
+                    <button class="action-btn" onclick="location.href='adproductos.html'">
+                        <i class="fas fa-plus"></i> Nuevo Producto
+                    </button>
+                    <button class="action-btn" onclick="generateReport()">
+                        <i class="fas fa-file-export"></i> Generar Reporte
+                    </button>
+                </div>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="kpi-info">
+                        <h3>Ventas Totales</h3>
+                        <p class="kpi-value" id="totalSales">$0</p>
+                        <span class="kpi-trend positive">+12.5% <i class="fas fa-arrow-up"></i></span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="kpi-info">
+                        <h3>Pedidos Nuevos</h3>
+                        <p class="kpi-value" id="newOrders">0</p>
+                        <span class="kpi-trend positive">+5.2% <i class="fas fa-arrow-up"></i></span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="kpi-info">
+                        <h3>Clientes Activos</h3>
+                        <p class="kpi-value" id="activeCustomers">0</p>
+                        <span class="kpi-trend positive">+8.7% <i class="fas fa-arrow-up"></i></span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="kpi-info">
+                        <h3>Stock Total</h3>
+                        <p class="kpi-value" id="totalStock">0</p>
+                        <span class="kpi-trend negative">-3.4% <i class="fas fa-arrow-down"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card main-chart">
+                    <div class="chart-header">
+                        <h3>Ventas vs Objetivos</h3>
+                        <div class="chart-actions">
+                            <button class="chart-period active">Día</button>
+                            <button class="chart-period">Semana</button>
+                            <button class="chart-period">Mes</button>
+                            <button class="chart-period">Año</button>
+                        </div>
+                    </div>
+                    <canvas id="salesChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Productos Más Vendidos</h3>
+                    <canvas id="topProductsChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Distribución de Clientes</h3>
+                    <canvas id="customerDistributionChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Rendimiento de Categorías</h3>
+                    <canvas id="categoryPerformanceChart"></canvas>
+                </div>
+            </div>
+
+            <div class="activity-section">
+                <div class="recent-activity">
+                    <h3>Actividad Reciente</h3>
+                    <div class="activity-list" id="activityList">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+                <div class="alerts-section">
+                    <h3>Alertas del Sistema</h3>
+                    <div class="alerts-list" id="alertsList">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Tasa de Conversión</h3>
+                    <div class="metric-chart">
+                        <canvas id="conversionChart"></canvas>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <h3>Satisfacción del Cliente</h3>
+                    <div class="metric-chart">
+                        <canvas id="satisfactionChart"></canvas>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <h3>ROI Marketing</h3>
+                    <div class="metric-chart">
+                        <canvas id="roiChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <div id="error-message" class="alert alert-danger" style="display: none; max-width: 400px; margin: 50px auto; text-align: center; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png" alt="Acceso denegado" style="width: 100px; margin-bottom: 20px;">
-        <h1 style="color: #721c24; font-size: 24px; margin-bottom: 10px;">Acceso no autorizado</h1>
-        <p style="color: #721c24; font-size: 16px;">No tienes permiso para ver esta página.</p>
+    <div id="error-message" class="alert alert-danger" style="display: none;">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png" alt="Acceso denegado">
+        <h1>Acceso no autorizado</h1>
+        <p>No tienes permiso para ver esta página.</p>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="admin.js"></script>
     <script>
         function verifyAdminToken() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -115,9 +179,9 @@
 
             if (tokenFromUrl === storedToken && storedToken) {
                 document.getElementById('content').style.display = 'block';
+                initializeDashboard();
             } else {
                 document.getElementById('error-message').style.display = 'block';
-                // Opcional: redirigir después de un tiempo
                 setTimeout(() => {
                     window.location.href = 'login.html';
                 }, 3000);

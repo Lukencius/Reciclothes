@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes - ReciClothes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="adstyle.css">
+    <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-material-ui/material-ui.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <div class="logo-img">
+                    <img src="media\ReciClothes_sinf.png" alt="ReciCLothes Logo" class="logo-img">
+                    <h2>ReciClothes</h2>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li><a href="admin.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+                    <li><a href="adproductos.html"><i class="fas fa-tshirt"></i> <span>Productos</span></a></li>
+                    <li><a href="adventas.html"><i class="fas fa-dollar-sign"></i> <span>Ventas</span></a></li>
+                    <li><a href="adpedidos.html"><i class="fas fa-shopping-cart"></i> <span>Pedidos</span></a></li>
+                    <li><a href="adtienda.html"><i class="fas fa-store"></i> <span>Tienda</span></a></li>
+                    <li><a href="adclientes.html" class="active"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <ul>
+                    <li><a href="adajustes.html"><i class="fas fa-cog"></i> <span>Ajustes</span></a></li>
+                    <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> <span>Cerrar sesión</span></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="clients-header">
+                <h1>Gestión de Clientes</h1>
+                <div class="client-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-users"></i>
+                        <div class="stat-info">
+                            <h3>Total Clientes</h3>
+                            <p id="totalClients">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-user-plus"></i>
+                        <div class="stat-info">
+                            <h3>Nuevos este mes</h3>
+                            <p id="newClients">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-crown"></i>
+                        <div class="stat-info">
+                            <h3>Clientes VIP</h3>
+                            <p id="vipClients">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-chart-line"></i>
+                        <div class="stat-info">
+                            <h3>Retención</h3>
+                            <p id="retentionRate">0%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search-section">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Buscar clientes...">
+                </div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">Todos</button>
+                    <button class="filter-btn" data-filter="active">Activos</button>
+                    <button class="filter-btn" data-filter="vip">VIP</button>
+                    <button class="filter-btn" data-filter="inactive">Inactivos</button>
+                </div>
+                <button class="export-btn">
+                    <i class="fas fa-download"></i> Exportar Datos
+                </button>
+            </div>
+
+            <div class="analytics-section">
+                <div class="chart-card">
+                    <h3>Crecimiento de Clientes</h3>
+                    <canvas id="growthChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Distribución por Edad</h3>
+                    <canvas id="ageChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Valor del Cliente</h3>
+                    <canvas id="valueChart"></canvas>
+                </div>
+            </div>
+
+            <div class="clients-table-section">
+                <div class="table-header">
+                    <h2>Lista de Clientes</h2>
+                    <button class="add-client-btn" onclick="openAddClientModal()">
+                        <i class="fas fa-plus"></i> Nuevo Cliente
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Fecha Registro</th>
+                                <th>Compras</th>
+                                <th>Valor Total</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientsTableBody">
+                            <!-- Se llenará dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <button class="prev-page"><i class="fas fa-chevron-left"></i></button>
+                    <span class="page-info">Página 1 de 1</span>
+                    <button class="next-page"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </main>
+
+        <div id="clientModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Detalles del Cliente</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="client-profile">
+                        <div class="profile-header">
+                            <div class="profile-image">
+                                <img src="" alt="Foto de perfil" id="clientImage">
+                                <button class="edit-photo">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                            </div>
+                            <div class="profile-info">
+                                <h3 id="clientName"></h3>
+                                <span class="client-status" id="clientStatus"></span>
+                            </div>
+                        </div>
+                        <div class="profile-details">
+                            <div class="detail-group">
+                                <h4>Información Personal</h4>
+                                <div class="detail-item">
+                                    <label>Email</label>
+                                    <input type="email" id="clientEmail">
+                                </div>
+                                <div class="detail-item">
+                                    <label>Teléfono</label>
+                                    <input type="tel" id="clientPhone">
+                                </div>
+                                <div class="detail-item">
+                                    <label>Dirección</label>
+                                    <textarea id="clientAddress"></textarea>
+                                </div>
+                            </div>
+                            <div class="detail-group">
+                                <h4>Historial de Compras</h4>
+                                <div class="purchase-history" id="purchaseHistory">
+                                    <!-- Se llenará dinámicamente -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="delete-btn" onclick="deleteClient()">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                    <button class="save-btn" onclick="saveClientChanges()">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="adclientes.js"></script>
+</body>
+</html>

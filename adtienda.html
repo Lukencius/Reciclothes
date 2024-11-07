@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda - ReciClothes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="adstyle.css">
+    <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-material-ui/material-ui.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <div class="logo-img">
+                    <img src="media\ReciClothes_sinf.png" alt="ReciCLothes Logo" class="logo-img">
+                    <h2>ReciClothes</h2>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li><a href="admin.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+                    <li><a href="adproductos.html"><i class="fas fa-tshirt"></i> <span>Productos</span></a></li>
+                    <li><a href="adventas.html"><i class="fas fa-dollar-sign"></i> <span>Ventas</span></a></li>
+                    <li><a href="adpedidos.html"><i class="fas fa-shopping-cart"></i> <span>Pedidos</span></a></li>
+                    <li><a href="adtienda.html" class="active"><i class="fas fa-store"></i> <span>Tienda</span></a></li>
+                    <li><a href="adclientes.html"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <ul>
+                    <li><a href="adajustes.html"><i class="fas fa-cog"></i> <span>Ajustes</span></a></li>
+                    <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> <span>Cerrar sesión</span></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="store-header">
+                <h1>Administración de Tienda</h1>
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-users"></i>
+                        <div class="stat-info">
+                            <h3>Visitantes Hoy</h3>
+                            <p id="visitorCount">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-shopping-bag"></i>
+                        <div class="stat-info">
+                            <h3>Conversión</h3>
+                            <p id="conversionRate">0%</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-cart-shopping"></i>
+                        <div class="stat-info">
+                            <h3>Carrito Promedio</h3>
+                            <p id="avgCart">$0.00</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-star"></i>
+                        <div class="stat-info">
+                            <h3>Valoración</h3>
+                            <p id="rating">0.0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="store-sections">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2><i class="fas fa-tags"></i> Categorías</h2>
+                        <button class="add-btn" onclick="openCategoryModal()">
+                            <i class="fas fa-plus"></i> Nueva Categoría
+                        </button>
+                    </div>
+                    <div class="categories-grid" id="categoriesGrid">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2><i class="fas fa-images"></i> Banners Promocionales</h2>
+                        <button class="add-btn" onclick="openBannerModal()">
+                            <i class="fas fa-plus"></i> Nuevo Banner
+                        </button>
+                    </div>
+                    <div class="banners-grid" id="bannersGrid">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2><i class="fas fa-cog"></i> Configuración de Tienda</h2>
+                        <button class="save-btn" onclick="saveStoreSettings()">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                    <div class="store-settings">
+                        <div class="settings-group">
+                            <h3>Información General</h3>
+                            <div class="setting-item">
+                                <label>Nombre de la Tienda</label>
+                                <input type="text" id="storeName" value="ReciClothes">
+                            </div>
+                            <div class="setting-item">
+                                <label>Descripción</label>
+                                <textarea id="storeDescription"></textarea>
+                            </div>
+                            <div class="setting-item">
+                                <label>Email de Contacto</label>
+                                <input type="email" id="storeEmail">
+                            </div>
+                        </div>
+                        <div class="settings-group">
+                            <h3>Configuración de Envíos</h3>
+                            <div class="setting-item">
+                                <label>Costo de Envío Base</label>
+                                <input type="number" id="shippingCost">
+                            </div>
+                            <div class="setting-item">
+                                <label>Envío Gratis desde</label>
+                                <input type="number" id="freeShippingThreshold">
+                            </div>
+                        </div>
+                        <div class="settings-group">
+                            <h3>Redes Sociales</h3>
+                            <div class="setting-item">
+                                <label>Facebook</label>
+                                <input type="url" id="facebookUrl">
+                            </div>
+                            <div class="setting-item">
+                                <label>Instagram</label>
+                                <input type="url" id="instagramUrl">
+                            </div>
+                            <div class="setting-item">
+                                <label>Twitter</label>
+                                <input type="url" id="twitterUrl">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div id="categoryModal" class="modal">
+            <div class="modal-content">
+                <h2>Nueva Categoría</h2>
+                <form id="categoryForm">
+                    <div class="form-group">
+                        <label>Nombre de la Categoría</label>
+                        <input type="text" id="categoryName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea id="categoryDescription"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Icono</label>
+                        <input type="text" id="categoryIcon" placeholder="fa-tshirt">
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="button" class="cancel-btn" onclick="closeCategoryModal()">Cancelar</button>
+                        <button type="submit" class="save-btn">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="bannerModal" class="modal">
+            <div class="modal-content">
+                <h2>Nuevo Banner</h2>
+                <form id="bannerForm">
+                    <div class="form-group">
+                        <label>Título</label>
+                        <input type="text" id="bannerTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Imagen</label>
+                        <input type="file" id="bannerImage" accept="image/*" required>
+                    </div>
+                    <div class="form-group">
+                        <label>URL de Destino</label>
+                        <input type="url" id="bannerUrl">
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="button" class="cancel-btn" onclick="closeBannerModal()">Cancelar</button>
+                        <button type="submit" class="save-btn">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="adtienda.js"></script>
+</body>
+</html>

@@ -230,3 +230,114 @@ app.get('/api/productos/:id', async (req, res) => {
 app.get('/ping', (req, res) => {
     res.status(200).send('pong');
 });
+
+// Ruta para añadir un nuevo producto
+app.post('/api/Productos', async (req, res) => {
+    try {
+        const { name, category, price, stock, imagen } = req.body;
+
+        // Validar que los campos requeridos estén presentes
+        if (!name || !category || !price || !stock) {
+            return res.status(400).json({ error: 'Todos los campos son requeridos' });
+        }
+
+        const connection = await mysql.createConnection(dbConfig);
+        const [result] = await connection.execute(
+            'INSERT INTO Productos (name, category, price, stock, imagen) VALUES (?, ?, ?, ?, ?)',
+            [name, category, price, stock, imagen || null]
+        );
+        await connection.end();
+
+        res.status(201).json({
+            message: 'Producto agregado exitosamente',
+            productId: result.insertId
+        });
+    } catch (error) {
+        console.error('Error al agregar el producto:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+// Ruta para modificar un producto
+app.put('/api/Productos/:id', async (req, res) => {
+    try {
+        const { name, category, price, stock, imagen } = req.body;
+        const productId = req.params.id;
+
+        const connection = await mysql.createConnection(dbConfig);
+        
+        // Verificar si el producto existe
+        const [rows] = await connection.execute(
+            'SELECT Id_Producto FROM Productos WHERE Id_Producto = ?',
+            [productId]
+        );
+
+        if (rows.length === 0) {
+            await connection.end();
+            return res.status(404).json({ error: 'Producto no encontrado' });
+        }
+
+        // Actualizar el producto
+        await connection.execute(
+            'UPDATE Productos SET name = ?, category = ?, price = ?, stock = ?, imagen = ? WHERE Id_Producto = ?',
+            [name, category, price, stock, imagen || null, productId]
+        );
+
+        await connection.end();
+
+        res.json({ 
+            message: 'Producto actualizado exitosamente',
+            productId: productId
+        });
+    } catch (error) {
+        console.error('Error al actualizar el producto:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+// Ruta para eliminar un producto
+app.delete('/api/Productos/:id', async (req, res) => {
+    console.log('Intentando eliminar producto con ID:', req.params.id);
+    try {
+        const productId = req.params.id;
+        const connection = await mysql.createConnection(dbConfig);
+        
+        // Verificar si el producto existe
+        const [rows] = await connection.execute(
+            'SELECT Id_Producto FROM Productos WHERE Id_Producto = ?',
+            [productId]
+        );
+
+        console.log('Resultado de la búsqueda:', rows);
+
+        if (rows.length === 0) {
+            console.log('Producto no encontrado');
+            await connection.end();
+            return res.status(404).json({ 
+                success: false,
+                error: 'Producto no encontrado' 
+            });
+        }
+
+        // Eliminar el producto
+        const [result] = await connection.execute(
+            'DELETE FROM Productos WHERE Id_Producto = ?',
+            [productId]
+        );
+
+        await connection.end();
+
+        console.log('Producto eliminado exitosamente');
+        res.json({ 
+            success: true,
+            message: 'Producto eliminado exitosamente',
+            productId: productId
+        });
+    } catch (error) {
+        console.error('Error al eliminar el producto:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Error interno del servidor' 
+        });
+    }
+});

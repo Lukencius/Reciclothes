@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajustes - ReciClothes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="adstyle.css">
+    <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-material-ui/material-ui.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <div class="logo-img">
+                    <img src="media\ReciClothes_sinf.png" alt="ReciCLothes Logo" class="logo-img">
+                    <h2>ReciClothes</h2>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li><a href="admin.html" ><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+                    <li><a href="adproductos.html"><i class="fas fa-tshirt"></i> <span>Productos</span></a></li>
+                    <li><a href="adventas.html" ><i class="fas fa-dollar-sign"></i> <span>Ventas</span></a></li>
+                    <li><a href="adpedidos.html"><i class="fas fa-shopping-cart"></i> <span>Pedidos</span></a></li>
+                    <li><a href="adtienda.html"><i class="fas fa-store"></i> <span>Tienda</span></a></li>
+                    <li><a href="adclientes.html"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <ul>
+                    <li><a href="adajustes.html" class="active" ><i class="fas fa-cog"></i> <span>Ajustes</span></a></li>
+                    <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> <span>Cerrar sesión</span></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="settings-header">
+                <h1>Ajustes del Sistema</h1>
+                <button class="save-all-btn" onclick="saveAllSettings()">
+                    <i class="fas fa-save"></i> Guardar Todos los Cambios
+                </button>
+            </div>
+
+            <div class="settings-navigation">
+                <button class="nav-btn active" data-section="company">
+                    <i class="fas fa-building"></i> Empresa
+                </button>
+                <button class="nav-btn" data-section="security">
+                    <i class="fas fa-shield-alt"></i> Seguridad
+                </button>
+                <button class="nav-btn" data-section="notifications">
+                    <i class="fas fa-bell"></i> Notificaciones
+                </button>
+                <button class="nav-btn" data-section="appearance">
+                    <i class="fas fa-paint-brush"></i> Apariencia
+                </button>
+                <button class="nav-btn" data-section="integrations">
+                    <i class="fas fa-plug"></i> Integraciones
+                </button>
+                <button class="nav-btn" data-section="backup">
+                    <i class="fas fa-database"></i> Respaldo
+                </button>
+            </div>
+
+            <div class="settings-sections">
+                <section id="company" class="settings-section active">
+                    <div class="section-header">
+                        <h2>Información de la Empresa</h2>
+                        <p>Gestiona la información básica de tu empresa</p>
+                    </div>
+                    <div class="settings-grid">
+                        <div class="settings-card">
+                            <h3>Perfil de la Empresa</h3>
+                            <div class="company-logo-upload">
+                                <img src="media/ReciClothes_sinf.png" alt="Logo" id="companyLogo">
+                                <button class="upload-btn">
+                                    <i class="fas fa-camera"></i> Cambiar Logo
+                                </button>
+                            </div>
+                            <div class="form-group">
+                                <label>Nombre de la Empresa</label>
+                                <input type="text" id="companyName" value="ReciClothes">
+                            </div>
+                            <div class="form-group">
+                                <label>Eslogan</label>
+                                <input type="text" id="companySlogan">
+                            </div>
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <textarea id="companyDescription"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3>Información de Contacto</h3>
+                            <div class="form-group">
+                                <label>Email de Contacto</label>
+                                <input type="email" id="contactEmail">
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono</label>
+                                <input type="tel" id="contactPhone">
+                            </div>
+                            <div class="form-group">
+                                <label>Dirección</label>
+                                <textarea id="contactAddress"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Horario de Atención</label>
+                                <input type="text" id="businessHours">
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3>Redes Sociales</h3>
+                            <div class="social-links">
+                                <div class="form-group">
+                                    <label><i class="fab fa-facebook"></i> Facebook</label>
+                                    <input type="url" id="facebookUrl">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="fab fa-instagram"></i> Instagram</label>
+                                    <input type="url" id="instagramUrl">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="fab fa-twitter"></i> Twitter</label>
+                                    <input type="url" id="twitterUrl">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="fab fa-linkedin"></i> LinkedIn</label>
+                                    <input type="url" id="linkedinUrl">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="security" class="settings-section">
+                    <div class="section-header">
+                        <h2>Configuración de Seguridad</h2>
+                        <p>Gestiona la seguridad de tu cuenta y sistema</p>
+                    </div>
+                    <div class="settings-grid">
+                        <div class="settings-card">
+                            <h3>Autenticación</h3>
+                            <div class="form-group">
+                                <label>Contraseña Actual</label>
+                                <input type="password" id="currentPassword">
+                            </div>
+                            <div class="form-group">
+                                <label>Nueva Contraseña</label>
+                                <input type="password" id="newPassword">
+                            </div>
+                            <div class="form-group">
+                                <label>Confirmar Contraseña</label>
+                                <input type="password" id="confirmPassword">
+                            </div>
+                            <button class="update-password-btn">
+                                <i class="fas fa-key"></i> Actualizar Contraseña
+                            </button>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3>Verificación en Dos Pasos</h3>
+                            <div class="two-factor-auth">
+                                <div class="switch-container">
+                                    <label class="switch">
+                                        <input type="checkbox" id="twoFactorAuth">
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <span>Activar verificación en dos pasos</span>
+                                </div>
+                                <p class="help-text">
+                                    Aumenta la seguridad de tu cuenta requiriendo un código adicional al iniciar sesión
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3>Sesiones Activas</h3>
+                            <div class="active-sessions" id="activeSessions">
+                                <!-- Se llenará dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Otras secciones... -->
+                <!-- Notificaciones, Apariencia, Integraciones, Respaldo -->
+            </div>
+        </main>
+    </div>
+
+    <script src="adajustes.js"></script>
+</body>
+</html>

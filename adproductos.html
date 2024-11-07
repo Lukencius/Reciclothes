@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración de Productos - ReciClothes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="adstyle.css">
+    <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-material-ui/material-ui.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <div class="logo-img">
+                    <img src="media\ReciClothes_sinf.png" alt="ReciCLothes Logo" class="logo-img">
+                    <h2>ReciClothes</h2>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li><a href="admin.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+                    <li><a href="adproductos.html" class="active"><i class="fas fa-tshirt"></i> <span>Productos</span></a></li>
+                    <li><a href="adventas.html"><i class="fas fa-dollar-sign"></i> <span>Ventas</span></a></li>
+                    <li><a href="adpedidos.html"><i class="fas fa-shopping-cart"></i> <span>Pedidos</span></a></li>
+                    <li><a href="adtienda.html"><i class="fas fa-store"></i> <span>Tienda</span></a></li>
+                    <li><a href="adclientes.html"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <ul>
+                    <li><a href="adajustes.html"><i class="fas fa-cog"></i> <span>Ajustes</span></a></li>
+                    <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> <span>Cerrar sesión</span></a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Tabla de productos -->
+    <div class="content">
+        <div class="header-actions">
+            <h2>Gestión de Productos</h2>
+            <button id="addProductBtn" class="add-btn">
+                <i class="fas fa-plus"></i> Nuevo Producto
+            </button>
+        </div>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Buscar productos..."
+                    oninput="searchProducts(this.value)"
+                >
+                <button 
+                    type="button"
+                    class="clear-search" 
+                    onclick="clearSearch()" 
+                    title="Limpiar búsqueda">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="searchResults" class="search-results"></div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="sort-header" onclick="sortProducts('id')" data-column="id">
+                                ID
+                                <i class="fas fa-sort"></i>
+                            </div>
+                        </th>
+                        <th>Imagen</th>
+                        <th>
+                            <div class="sort-header" onclick="sortProducts('nombre')" data-column="nombre">
+                                Nombre
+                                <i class="fas fa-sort"></i>
+                            </div>
+                        </th>
+                        <th>Categoría</th>
+                        <th>
+                            <div class="sort-header" onclick="sortProducts('precio')" data-column="precio">
+                                Precio
+                                <i class="fas fa-sort"></i>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="sort-header" onclick="sortProducts('stock')" data-column="stock">
+                                Stock
+                                <i class="fas fa-sort"></i>
+                            </div>
+                        </th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="productsTableBody">
+                    <!-- Productos aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal más compacto -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle">Añadir Producto</h2>
+            <form id="productForm">
+                <div class="form-group">
+                    <label for="productName">Nombre del Producto*</label>
+                    <input type="text" id="productName" required placeholder="Ingrese el nombre del producto">
+                </div>
+                <div class="form-group">
+                    <label for="productCategory">Categoría*</label>
+                    <input type="text" id="productCategory" required placeholder="Ingrese la categoría">
+                </div>
+                <div class="form-group">
+                    <label for="productPrice">Precio ($)*</label>
+                    <input type="number" id="productPrice" step="0.01" required min="0" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="productStock">Stock*</label>
+                    <input type="number" id="productStock" required min="0" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label for="productImage">URL de la Imagen</label>
+                    <input type="text" id="productImage" placeholder="https://ejemplo.com/imagen.jpg">
+                </div>
+                <button type="submit" class="add-btn">
+                    <i class="fas fa-save"></i> Guardar Producto
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="adproducto.js"></script>
+</body>
+</html>

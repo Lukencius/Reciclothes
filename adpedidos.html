@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos - ReciClothes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="adstyle.css">
+    <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-material-ui/material-ui.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <div class="logo-img">
+                    <img src="media\ReciClothes_sinf.png" alt="ReciCLothes Logo" class="logo-img">
+                    <h2>ReciClothes</h2>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li><a href="admin.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+                    <li><a href="adproductos.html"><i class="fas fa-tshirt"></i> <span>Productos</span></a></li>
+                    <li><a href="adventas.html"><i class="fas fa-dollar-sign"></i> <span>Ventas</span></a></li>
+                    <li><a href="adpedidos.html" class="active"><i class="fas fa-shopping-cart"></i> <span>Pedidos</span></a></li>
+                    <li><a href="adtienda.html"><i class="fas fa-store"></i> <span>Tienda</span></a></li>
+                    <li><a href="adclientes.html"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <ul>
+                    <li><a href="adajustes.html"><i class="fas fa-cog"></i> <span>Ajustes</span></a></li>
+                    <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> <span>Cerrar sesión</span></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="orders-header">
+                <h1>Gestión de Pedidos</h1>
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-clock"></i>
+                        <div class="stat-info">
+                            <h3>Pendientes</h3>
+                            <p id="pendingCount">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-box"></i>
+                        <div class="stat-info">
+                            <h3>En Proceso</h3>
+                            <p id="processingCount">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-truck"></i>
+                        <div class="stat-info">
+                            <h3>En Envío</h3>
+                            <p id="shippingCount">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-check-circle"></i>
+                        <div class="stat-info">
+                            <h3>Completados</h3>
+                            <p id="completedCount">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="orders-filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Buscar pedido por ID, cliente o estado...">
+                </div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">Todos</button>
+                    <button class="filter-btn" data-filter="pending">Pendientes</button>
+                    <button class="filter-btn" data-filter="processing">En Proceso</button>
+                    <button class="filter-btn" data-filter="shipping">En Envío</button>
+                    <button class="filter-btn" data-filter="completed">Completados</button>
+                </div>
+            </div>
+
+            <div class="orders-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID Pedido</th>
+                            <th>Cliente</th>
+                            <th>Productos</th>
+                            <th>Fecha</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <!-- Los pedidos se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <button class="prev-page"><i class="fas fa-chevron-left"></i></button>
+                <span class="page-info">Página 1 de 1</span>
+                <button class="next-page"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </main>
+
+        <div id="orderDetailsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Detalles del Pedido #<span id="orderIdDetail"></span></h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="order-info">
+                        <div class="customer-info">
+                            <h3>Información del Cliente</h3>
+                            <p><strong>Nombre:</strong> <span id="customerName"></span></p>
+                            <p><strong>Email:</strong> <span id="customerEmail"></span></p>
+                            <p><strong>Teléfono:</strong> <span id="customerPhone"></span></p>
+                        </div>
+                        <div class="shipping-info">
+                            <h3>Información de Envío</h3>
+                            <p><strong>Dirección:</strong> <span id="shippingAddress"></span></p>
+                            <p><strong>Ciudad:</strong> <span id="shippingCity"></span></p>
+                            <p><strong>Código Postal:</strong> <span id="shippingZip"></span></p>
+                        </div>
+                    </div>
+                    <div class="order-products">
+                        <h3>Productos</h3>
+                        <table class="products-table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderProductsBody">
+                                <!-- Productos del pedido -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="order-summary">
+                        <div class="summary-item">
+                            <span>Subtotal:</span>
+                            <span id="orderSubtotal"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Envío:</span>
+                            <span id="orderShipping"></span>
+                        </div>
+                        <div class="summary-item total">
+                            <span>Total:</span>
+                            <span id="orderTotal"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="update-status-btn">Actualizar Estado</button>
+                    <button class="print-order-btn"><i class="fas fa-print"></i> Imprimir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="adpedidos.js"></script>
+</body>
+</html>
