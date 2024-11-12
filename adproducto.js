@@ -111,6 +111,12 @@ function renderProducts(products = currentProducts) {
                 </button>
             </td>
         `;
+        
+        // Agregar un atributo data con la descripción para poder mostrarla en un tooltip
+        if (product.description) {
+            row.querySelector('td:nth-child(3)').setAttribute('title', product.description);
+        }
+        
         tableBody.appendChild(row);
     });
 }
@@ -138,7 +144,8 @@ async function addProduct(event) {
         category: document.getElementById('productCategory').value,
         price: parseFloat(document.getElementById('productPrice').value),
         stock: parseInt(document.getElementById('productStock').value),
-        imagen: document.getElementById('productImage').value
+        description: document.getElementById('productDescription').value,
+        imagen: document.getElementById('productImage').value,
     };
 
     try {
@@ -176,6 +183,7 @@ async function editProduct(id) {
         document.getElementById('productPrice').value = product.price;
         document.getElementById('productStock').value = product.stock;
         document.getElementById('productImage').value = product.imagen;
+        document.getElementById('productDescription').value = product.description;
         
         // Guardar el ID del producto que se está editando
         document.getElementById('productForm').dataset.editId = id;
@@ -268,33 +276,22 @@ async function handleFormSubmit(event) {
     event.preventDefault();
     
     try {
-        // Obtener los valores del formulario
+        const description = document.getElementById('productDescription').value.trim();
+        
         const formData = {
-            name: document.getElementById('productName').value,
+            name: document.getElementById('productName').value.trim(),
             category: document.getElementById('productCategory').value,
             price: parseFloat(document.getElementById('productPrice').value),
             stock: parseInt(document.getElementById('productStock').value),
-            imagen: document.getElementById('productImage').value || 'https://via.placeholder.com/80?text=Sin+Imagen'
+            imagen: document.getElementById('productImage').value || 'https://via.placeholder.com/80?text=Sin+Imagen',
+            description: description
         };
 
-        // Validar que los campos requeridos no estén vacos
-        if (!formData.name || !formData.category || isNaN(formData.price) || isNaN(formData.stock)) {
-            throw new Error('Todos los campos son requeridos');
-        }
-
-        // Validar que el precio y stock sean números positivos
-        if (formData.price < 0 || formData.stock < 0) {
-            throw new Error('El precio y el stock deben ser números positivos');
-        }
-
-        console.log('Datos a enviar:', formData);
+        console.log('Datos a enviar:', formData); // Para debugging
 
         const editId = event.target.dataset.editId;
         const url = editId ? `${API_URL}/Productos/${editId}` : `${API_URL}/Productos`;
         const method = editId ? 'PUT' : 'POST';
-
-        console.log('URL:', url);
-        console.log('Método:', method);
 
         const response = await fetch(url, {
             method: method,
@@ -302,10 +299,8 @@ async function handleFormSubmit(event) {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify(formData) // Enviamos los datos como JSON
         });
-
-        console.log('Respuesta del servidor:', response);
 
         if (!response.ok) {
             const errorData = await response.text();
@@ -313,20 +308,29 @@ async function handleFormSubmit(event) {
             throw new Error(`Error del servidor: ${response.status}`);
         }
 
-        // Si todo sale bien, cerrar el modal y recargar los productos
+        // Mostrar mensaje de éxito
+        await Swal.fire({
+            title: '¡Éxito!',
+            text: editId ? 'Producto actualizado correctamente' : 'Producto agregado correctamente',
+            icon: 'success',
+            timer: 2000
+        });
+
+        // Cerrar modal y recargar productos
         document.getElementById('productModal').style.display = "none";
         event.target.reset();
         if (editId) {
             delete event.target.dataset.editId;
         }
         await loadProducts();
-        
-        // Mostrar mensaje de éxito
-        alert(editId ? 'Producto actualizado exitosamente' : 'Producto agregado exitosamente');
 
     } catch (error) {
         console.error('Error detallado:', error);
-        alert(error.message || 'Error al procesar el producto');
+        Swal.fire({
+            title: 'Error',
+            text: error.message || 'Error al procesar el producto',
+            icon: 'error'
+        });
     }
 }
 
