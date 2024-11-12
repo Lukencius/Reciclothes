@@ -30,7 +30,11 @@ const createDbConnection = async () => {
 // Middleware optimizado
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors());
+app.use(cors({
+    origin: ['https://reci-clothes.vercel.app', 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+}));
 
 // Ruta para la página de registro
 app.get('/signup', (req, res) => {
@@ -173,6 +177,19 @@ const initDatabase = async () => {
             stock INT DEFAULT 0,
             imagen VARCHAR(500),  // Cambiado de BLOB a VARCHAR para almacenar URLs
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    
+    await checkTable('transacciones', `
+        CREATE TABLE IF NOT EXISTS transacciones (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            buy_order VARCHAR(50) NOT NULL,
+            session_id VARCHAR(50) NOT NULL,
+            amount DECIMAL(10,2) NOT NULL,
+            email VARCHAR(100),
+            status VARCHAR(20) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )
     `);
 };
@@ -352,12 +369,32 @@ app.post('/crear-transaccion', async (req, res) => {
     try {
         const { total, email } = req.body;
         
+        if (!total || total <= 0) {
+            return res.status(400).json({ 
+                error: 'El monto total es inválido' 
+            });
+        }
+
+        const buyOrder = 'orden_' + Date.now();
+        const sessionId = 'sesion_' + Date.now();
+        
         const createResponse = await Transaction.create(
-            'orden_' + Date.now(),
-            'sesion_' + Date.now(),
+            buyOrder,
+            sessionId,
             total,
             'https://reci-clothes.vercel.app/confirmar-pago.html'
         );
+
+        // Guardar información de la transacción en la base de datos
+        const connection = await createDbConnection();
+        try {
+            await connection.execute(
+                'INSERT INTO transacciones (buy_order, session_id, amount, email, status) VALUES (?, ?, ?, ?, ?)',
+                [buyOrder, sessionId, total, email, 'CREATED']
+            );
+        } finally {
+            await connection.end();
+        }
 
         res.json({
             url: createResponse.url,
@@ -365,7 +402,10 @@ app.post('/crear-transaccion', async (req, res) => {
         });
     } catch (error) {
         console.error('Error al crear transacción:', error);
-        res.status(500).json({ error: 'Error al procesar el pago' });
+        res.status(500).json({ 
+            error: 'Error al procesar el pago',
+            details: error.message 
+        });
     }
 });
 

@@ -305,13 +305,19 @@
             if (datosCompra.metodoPago === 'webpay') {
                 try {
                     // Llamada a tu API para iniciar la transacción
-                    const response = await fetch('https://reciclothes.onrender.com/crear-transaccion', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(datosCompra)
-                    });
+                const response = await fetch('https://reciclothes.onrender.com/crear-transaccion', {
+                    body: JSON.stringify({
+                        email: datosCompra.email,
+                        total: datosCompra.total
+                    }),
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    method: 'POST'
+                });
+
 
                     const data = await response.json();
 
