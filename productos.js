@@ -16,15 +16,23 @@ async function cargarProductos() {
             throw new Error('No se encontró el elemento productosContainer');
         }
         
+        // Obtener la categoría de la página actual
+        const categoria = productosContainer.dataset.category;
+        
         // Realizar petición a la API
         const response = await fetch('https://reciclothes.onrender.com/api/productos');
         const productos = await response.json();
+        
+        // Filtrar productos si hay una categoría específica
+        const productosFiltrados = categoria 
+            ? productos.filter(producto => producto.category === categoria)
+            : productos;
         
         // Limpiar el contenedor antes de agregar nuevos productos
         productosContainer.innerHTML = ''; 
         
         // Generar el HTML para todos los productos usando template literals
-        const productosHTML = productos.map(producto => {
+        const productosHTML = productosFiltrados.map(producto => {
             // Usar imagen por defecto si no hay URL de imagen
             const imgSrc = producto.imagen || 'media/polera.png';
             
