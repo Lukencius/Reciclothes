@@ -30,11 +30,7 @@ const createDbConnection = async () => {
 // Middleware optimizado
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors({
-    origin: ['https://reci-clothes.vercel.app', 'http://localhost:3000'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
-}));
+app.use(cors());
 
 // Ruta para la página de registro
 app.get('/signup', (req, res) => {
@@ -179,19 +175,6 @@ const initDatabase = async () => {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
-    
-    await checkTable('transacciones', `
-        CREATE TABLE IF NOT EXISTS transacciones (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            buy_order VARCHAR(50) NOT NULL,
-            session_id VARCHAR(50) NOT NULL,
-            amount DECIMAL(10,2) NOT NULL,
-            email VARCHAR(100),
-            status VARCHAR(20) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        )
-    `);
 };
 
 initDatabase();
@@ -253,7 +236,7 @@ app.get('/ping', (req, res) => {
 // Ruta para añadir un nuevo producto
 app.post('/api/Productos', async (req, res) => {
     try {
-        const { name, category, price, stock, imagen } = req.body;
+        const { name, category, price, stock, imagen, description } = req.body;
 
         // Validar que los campos requeridos estén presentes
         if (!name || !category || !price || !stock) {
@@ -262,8 +245,8 @@ app.post('/api/Productos', async (req, res) => {
 
         const connection = await mysql.createConnection(dbConfig);
         const [result] = await connection.execute(
-            'INSERT INTO Productos (name, category, price, stock, imagen) VALUES (?, ?, ?, ?, ?)',
-            [name, category, price, stock, imagen || null]
+            'INSERT INTO Productos (name, category, price, stock, imagen, description) VALUES (?, ?, ?, ?, ?, ?)',
+            [name, category, price, stock, imagen || null, description || null]
         );
         await connection.end();
 
@@ -369,32 +352,12 @@ app.post('/crear-transaccion', async (req, res) => {
     try {
         const { total, email } = req.body;
         
-        if (!total || total <= 0) {
-            return res.status(400).json({ 
-                error: 'El monto total es inválido' 
-            });
-        }
-
-        const buyOrder = 'orden_' + Date.now();
-        const sessionId = 'sesion_' + Date.now();
-        
         const createResponse = await Transaction.create(
-            buyOrder,
-            sessionId,
+            'orden_' + Date.now(),
+            'sesion_' + Date.now(),
             total,
-            'https://reci-clothes.vercel.app/confirmar-pago.html'
+            'https://reci-clothes.vercel.app/confirmar-pago'
         );
-
-        // Guardar información de la transacción en la base de datos
-        const connection = await createDbConnection();
-        try {
-            await connection.execute(
-                'INSERT INTO transacciones (buy_order, session_id, amount, email, status) VALUES (?, ?, ?, ?, ?)',
-                [buyOrder, sessionId, total, email, 'CREATED']
-            );
-        } finally {
-            await connection.end();
-        }
 
         res.json({
             url: createResponse.url,
@@ -402,10 +365,7 @@ app.post('/crear-transaccion', async (req, res) => {
         });
     } catch (error) {
         console.error('Error al crear transacción:', error);
-        res.status(500).json({ 
-            error: 'Error al procesar el pago',
-            details: error.message 
-        });
+        res.status(500).json({ error: 'Error al procesar el pago' });
     }
 });
 
