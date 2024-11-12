@@ -356,7 +356,7 @@ app.post('/crear-transaccion', async (req, res) => {
             'orden_' + Date.now(),
             'sesion_' + Date.now(),
             total,
-            'https://reci-clothes.vercel.app/confirmar-pago'
+            'https://reci-clothes.vercel.app/confirmar-pago.html'
         );
 
         res.json({
