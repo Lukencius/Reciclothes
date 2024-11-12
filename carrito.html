@@ -55,10 +55,15 @@
                     <a href="carrito.html" class="btn btn-success me-2">
                         <i class="bi bi-cart"></i>
                     </a>
-                    <a href="login.html" class="btn btn-success" id="loginButton">
-                        <i class="bi bi-person"></i>
-                        <span>Sesión: </span><span id="nombreUsuario"></span>
-                    </a>
+                    <div class="dropdown d-inline-block">
+                        <a href="login.html" class="btn btn-success dropdown-toggle" id="loginButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person"></i>
+                            <span>Sesión: </span><span id="nombreUsuario"></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#" onclick="cerrarSesion()">Cerrar sesión</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -122,7 +127,14 @@
                             <label class="form-label">Teléfono</label>
                             <input type="tel" class="form-control" required>
                         </div>
-                        <button type="submit" class="btn btn-success w-100">Confirmar Pedido</button>
+                        <div class="mb-3">
+                            <label class="form-label">Método de Pago</label>
+                            <select class="form-control" id="metodoPago" required>
+                                <option value="">Seleccione método de pago</option>
+                                <option value="webpay">Webpay Plus (Débito/Crédito)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Proceder al Pago</button>
                     </form>
                 </div>
             </div>
@@ -273,16 +285,58 @@
             modal.show();
         }
 
-        function procesarCompra(event) {
+        async function procesarCompra(event) {
             event.preventDefault();
             
-            // Aquí iría la lógica para procesar el pago
-            alert('¡Pago procesado con éxito! Gracias por tu compra.');
-            localStorage.removeItem('carrito');
-            cargarCarrito();
+            const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+            const total = carrito.reduce((sum, item) => sum + (item.price * item.cantidad), 0);
             
-            const modal = bootstrap.Modal.getInstance(document.getElementById('formularioPagoModal'));
-            modal.hide();
+            const formData = new FormData(event.target);
+            const datosCompra = {
+                nombre: formData.get('nombre'),
+                email: formData.get('email'),
+                direccion: formData.get('direccion'),
+                telefono: formData.get('telefono'),
+                metodoPago: document.getElementById('metodoPago').value,
+                total: total,
+                items: carrito
+            };
+
+            if (datosCompra.metodoPago === 'webpay') {
+                try {
+                    // Llamada a tu API para iniciar la transacción
+                    const response = await fetch('tu-api/crear-transaccion', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(datosCompra)
+                    });
+
+                    const data = await response.json();
+
+                    if (data.url && data.token) {
+                        // Crear formulario para redirección a Webpay
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = data.url;
+
+                        const tokenInput = document.createElement('input');
+                        tokenInput.type = 'hidden';
+                        tokenInput.name = 'token_ws';
+                        tokenInput.value = data.token;
+
+                        form.appendChild(tokenInput);
+                        document.body.appendChild(form);
+                        form.submit();
+                    } else {
+                        throw new Error('Error al procesar el pago');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Hubo un error al procesar el pago. Por favor intente nuevamente.');
+                }
+            }
         }
 
         // Reemplazar la función inicializarAutocompletado
@@ -419,22 +473,20 @@
             
             if (userData) {
                 const user = JSON.parse(userData);
-                loginButton.innerHTML = `<span class="d-none d-md-inline">Sesión: ${user.name}</span><span class="d-md-none"><i class="bi bi-person-check"></i></span>`;
-                loginButton.href = '#';
-                
-                // Agregar menú desplegable para cerrar sesión
-                loginButton.classList.add('dropdown-toggle');
-                loginButton.setAttribute('data-bs-toggle', 'dropdown');
-                
-                // Crear el menú desplegable
-                const dropdownMenu = document.createElement('ul');
-                dropdownMenu.className = 'dropdown-menu dropdown-menu-end';
-                dropdownMenu.innerHTML = `
-                    <li><a class="dropdown-item" href="#" onclick="cerrarSesion()">Cerrar sesión</a></li>
+                loginButton.innerHTML = `
+                    <i class="bi bi-person"></i>
+                    <span class="d-none d-md-inline">Sesión: ${user.name}</span>
+                    <span class="d-md-none"><i class="bi bi-person-check"></i></span>
                 `;
-                
-                // Agregar el menú después del botón
-                loginButton.parentNode.appendChild(dropdownMenu);
+                loginButton.href = '#';
+            } else {
+                loginButton.innerHTML = `
+                    <i class="bi bi-person"></i>
+                    <span class="d-none d-md-inline">Iniciar Sesión</span>
+                `;
+                loginButton.href = 'login.html';
+                loginButton.classList.remove('dropdown-toggle');
+                loginButton.removeAttribute('data-bs-toggle');
             }
         }
 

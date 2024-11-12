@@ -9,6 +9,8 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = process.env.PORT || 3000;
 require('dotenv').config();
+const WebpayPlus = require('transbank-sdk').WebpayPlus;
+const Transaction = WebpayPlus.Transaction;
 
 // Configuración de la base de datos como constante
 const dbConfig = {
@@ -338,6 +340,62 @@ app.delete('/api/Productos/:id', async (req, res) => {
         res.status(500).json({ 
             success: false,
             error: 'Error interno del servidor' 
+        });
+    }
+});
+
+// Configurar Webpay
+WebpayPlus.configureForTesting();
+
+// Agregar la ruta para crear transacción
+app.post('/crear-transaccion', async (req, res) => {
+    try {
+        const { total, email } = req.body;
+        
+        const createResponse = await Transaction.create(
+            'orden_' + Date.now(),
+            'sesion_' + Date.now(),
+            total,
+            'https://reci-clothes.vercel.app/confirmar-pago'
+        );
+
+        res.json({
+            url: createResponse.url,
+            token: createResponse.token
+        });
+    } catch (error) {
+        console.error('Error al crear transacción:', error);
+        res.status(500).json({ error: 'Error al procesar el pago' });
+    }
+});
+
+// Ruta para confirmar la transacción
+app.post('/confirmar-transaccion', async (req, res) => {
+    try {
+        const { token_ws } = req.body;
+        
+        // Confirmar la transacción con Webpay
+        const confirmResponse = await Transaction.commit(token_ws);
+        
+        // Verificar el estado de la transacción
+        if (confirmResponse.status === 'AUTHORIZED') {
+            res.json({
+                success: true,
+                ordenId: confirmResponse.buy_order,
+                amount: confirmResponse.amount,
+                message: 'Pago procesado correctamente'
+            });
+        } else {
+            res.json({
+                success: false,
+                message: 'La transacción no fue autorizada'
+            });
+        }
+    } catch (error) {
+        console.error('Error al confirmar transacción:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al procesar la confirmación del pago'
         });
     }
 });
