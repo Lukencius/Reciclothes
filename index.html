@@ -47,13 +47,11 @@
                         </ul>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <form class="d-flex">
-                        <input class="form-control me-2" type="search" placeholder="Buscar productos" aria-label="Buscar">
-                        <button class="btn btn-outline-light" type="submit">Buscar</button>
-                    </form>
+                <div class="col-auto position-relative" style="width: 400px;">
+                    <input type="search" id="searchInput" class="form-control form-control-sm" placeholder="Buscar...">
+                    <div id="searchResults" class="position-absolute bg-white shadow-sm rounded mt-1 d-none" style="z-index: 1000; width: 250px; right: 0;"></div>
                 </div>
-                <div class="col-auto ms-auto">
+                <div class="col-auto ms-2">
                     <a href="carrito.html" class="btn btn-success me-2">
                         <i class="bi bi-cart"></i>
                     </a>

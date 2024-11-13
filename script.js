@@ -69,5 +69,85 @@ document.addEventListener('DOMContentLoaded', function() {
             emailInput.value = '';
         }
     });
+
+    // Función para buscar productos
+    function searchProducts(query) {
+        query = query.toLowerCase().trim();
+        return productos.filter(producto => 
+            producto.nombre.toLowerCase().includes(query) ||
+            producto.descripcion.toLowerCase().includes(query) ||
+            producto.categoria.toLowerCase().includes(query)
+        );
+    }
+
+    // Función para crear el HTML de los resultados
+    function createSearchResultHTML(producto) {
+        return `
+            <div class="search-result p-2 border-bottom hover-bg-light" style="cursor: pointer;" 
+                 onclick="window.location.href='producto.html?id=${producto.id}'">
+                <div class="d-flex align-items-center">
+                    <img src="${producto.imagen}" alt="${producto.nombre}" style="width: 50px; height: 50px; object-fit: cover;" class="me-2">
+                    <div>
+                        <div class="fw-bold">${producto.nombre}</div>
+                        <div class="small text-muted">$${producto.precio}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Configurar el buscador en tiempo real
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    let searchTimeout;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        
+        const query = this.value;
+        
+        // Si el campo de búsqueda está vacío, ocultar resultados
+        if (!query) {
+            searchResults.classList.add('d-none');
+            return;
+        }
+
+        // Esperar 300ms después de que el usuario deje de escribir para buscar
+        searchTimeout = setTimeout(() => {
+            const results = searchProducts(query);
+            
+            if (results.length > 0) {
+                searchResults.innerHTML = results
+                    .slice(0, 5) // Limitar a 5 resultados
+                    .map(createSearchResultHTML)
+                    .join('');
+                searchResults.classList.remove('d-none');
+            } else {
+                searchResults.innerHTML = '<div class="p-2 text-muted">No se encontraron productos</div>';
+                searchResults.classList.remove('d-none');
+            }
+        }, 300);
+    });
+
+    // Cerrar resultados cuando se hace clic fuera
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.classList.add('d-none');
+        }
+    });
+
+    // Prevenir que el formulario se envíe
+    searchInput.closest('form')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+    });
+
+    // Agregar estilos CSS para hover
+    const style = document.createElement('style');
+    style.textContent = `
+        .hover-bg-light:hover {
+            background-color: #f8f9fa;
+        }
+    `;
+    document.head.appendChild(style);
 });
 
