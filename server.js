@@ -30,7 +30,12 @@ const createDbConnection = async () => {
 // Middleware optimizado
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors());
+app.use(cors({
+    origin: 'https://reci-clothes.vercel.app',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Ruta para la página de registro
 app.get('/signup', (req, res) => {
