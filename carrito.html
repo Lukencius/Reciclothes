@@ -319,7 +319,7 @@
             if (metodoPago === 'mercadopago') {
                 try {
                     // Llamada al backend para crear la preferencia
-                    const response = await fetch('http://tu-backend/crear-preferencia', {
+                    const response = await fetch('https://reci-clothes.onrender.com/crear-preferencia', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
