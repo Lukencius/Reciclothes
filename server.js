@@ -9,9 +9,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = process.env.PORT || 3000;
 require('dotenv').config();
-const WebpayPlus = require('transbank-sdk').WebpayPlus;
-const Transaction = WebpayPlus.Transaction;
-const { Options, Environment } = require('transbank-sdk');
+const mercadopago = require('mercadopago');
 
 // Configuración para ambiente de integración
 WebpayPlus.configureForIntegration(
@@ -356,81 +354,79 @@ app.delete('/api/Productos/:id', async (req, res) => {
     }
 });
 
-// Configurar Webpay
-WebpayPlus.configureForTesting();
+// Configura las credenciales de Mercado Pago
+mercadopago.configure({
+    access_token: 'TEST-1234567890123456789012345678901234-123456-123456789012345678901234567890123'
+    // Reemplaza con tu Access Token de prueba
+});
 
-// Modificar la ruta de crear transacción
-app.post('/crear-transaccion', async (req, res) => {
+// Agrega esta nueva ruta para crear preferencias de pago
+app.post('/crear-preferencia', async (req, res) => {
     try {
-        const { total, email } = req.body;
-        
-        // Validar que el total sea un número válido
-        if (!total || isNaN(total)) {
-            return res.status(400).json({ 
-                success: false, 
-                error: 'El monto total es requerido y debe ser un número válido' 
-            });
-        }
+        const { items, nombre, email, telefono, direccion } = req.body;
 
-        // Agregar logs para debugging
-        console.log('Iniciando creación de transacción:', { total, email });
+        const preference = {
+            items: items.map(item => ({
+                title: item.title,
+                unit_price: Number(item.unit_price),
+                quantity: Number(item.quantity),
+                currency_id: 'CLP'
+            })),
+            payer: {
+                name: nombre,
+                email: email,
+                phone: {
+                    number: telefono
+                },
+                address: {
+                    street_name: direccion
+                }
+            },
+            back_urls: {
+                success: "https://reci-clothes.vercel.app/success",
+                failure: "https://reci-clothes.vercel.app/failure", 
+                pending: "https://reci-clothes.vercel.app/pending"
+            },
+            auto_return: "approved",
+            binary_mode: true,
+            statement_descriptor: "RECICLOTHES",
+            external_reference: Date.now().toString()
+        };
 
-        const buyOrder = 'orden_' + Date.now();
-        const sessionId = 'sesion_' + Date.now() + '_' + email;
-        const returnUrl = 'https://reci-clothes.vercel.app/confirmar-pago';
-
-        const createResponse = await Transaction.create(
-            buyOrder,
-            sessionId,
-            parseInt(total), // Asegurarse de que el total sea un entero
-            returnUrl,
-            email // Incluir el email como parámetro adicional
-        );
-
-        console.log('Respuesta de Webpay:', createResponse);
-
-        res.json({
-            success: true,
-            url: createResponse.url,
-            token: createResponse.token
-        });
+        const response = await mercadopago.preferences.create(preference);
+        res.json(response.body.id);
     } catch (error) {
-        console.error('Error detallado al crear transacción:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Error al procesar el pago',
-            details: error.message 
-        });
+        console.error('Error al crear preferencia:', error);
+        res.status(500).json({ error: 'Error al crear preferencia de pago' });
     }
 });
 
-// Ruta para confirmar la transacción
-app.post('/confirmar-transaccion', async (req, res) => {
-    try {
-        const { token_ws } = req.body;
-        
-        // Confirmar la transacción con Webpay
-        const confirmResponse = await Transaction.commit(token_ws);
-        
-        // Verificar el estado de la transacción
-        if (confirmResponse.status === 'AUTHORIZED') {
-            res.json({
-                success: true,
-                ordenId: confirmResponse.buy_order,
-                amount: confirmResponse.amount,
-                message: 'Pago procesado correctamente'
-            });
-        } else {
-            res.json({
-                success: false,
-                message: 'La transacción no fue autorizada'
-            });
-        }
-    } catch (error) {
-        console.error('Error al confirmar transacción:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al procesar la confirmación del pago'
-        });
-    }
+// Rutas para manejar los diferentes estados del pago
+app.get('/success', (req, res) => {
+    res.send(`
+        <script>
+            alert('¡Pago exitoso!');
+            localStorage.removeItem('carrito');
+            window.location.href = '/';
+        </script>
+    `);
+});
+
+app.get('/failure', (req, res) => {
+    res.send(`
+        <script>
+            alert('El pago falló. Por favor intenta nuevamente.');
+            window.location.href = '/carrito.html';
+        </script>
+    `);
+});
+
+app.get('/pending', (req, res) => {
+    res.send(`
+        <script>
+            alert('El pago está pendiente.');
+            localStorage.removeItem('carrito');
+            window.location.href = '/';
+        </script>
+    `);
 });
