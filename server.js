@@ -11,12 +11,6 @@ const port = process.env.PORT || 3000;
 require('dotenv').config();
 const mercadopago = require('mercadopago');
 
-// Configuración para ambiente de integración
-WebpayPlus.configureForIntegration(
-    process.env.WEBPAY_COMMERCE_CODE || '597055555532',
-    process.env.WEBPAY_API_KEY || '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C'
-);
-
 // Configuración de la base de datos como constante
 const dbConfig = {
     host: 'servicioalochoro-prueba1631.l.aivencloud.com',
