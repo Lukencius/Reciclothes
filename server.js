@@ -349,10 +349,8 @@ app.delete('/api/Productos/:id', async (req, res) => {
 });
 
 // Configura las credenciales de Mercado Pago
-mercadopago.configure({
-    access_token: 'TEST-1234567890123456789012345678901234-123456-123456789012345678901234567890123'
-    // Reemplaza con tu Access Token de prueba
-});
+mercadopago.configurations.setAccessToken('TEST-1234567890123456789012345678901234-123456-123456789012345678901234567890123');
+// Reemplaza con tu Access Token de prueba
 
 // Agrega esta nueva ruta para crear preferencias de pago
 app.post('/crear-preferencia', async (req, res) => {
