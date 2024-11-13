@@ -376,14 +376,15 @@ app.post('/crear-transaccion', async (req, res) => {
         console.log('Iniciando creación de transacción:', { total, email });
 
         const buyOrder = 'orden_' + Date.now();
-        const sessionId = 'sesion_' + Date.now();
+        const sessionId = 'sesion_' + Date.now() + '_' + email;
         const returnUrl = 'https://reci-clothes.vercel.app/confirmar-pago';
 
         const createResponse = await Transaction.create(
             buyOrder,
             sessionId,
             parseInt(total), // Asegurarse de que el total sea un entero
-            returnUrl
+            returnUrl,
+            email // Incluir el email como parámetro adicional
         );
 
         console.log('Respuesta de Webpay:', createResponse);
