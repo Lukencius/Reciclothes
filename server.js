@@ -11,6 +11,13 @@ const port = process.env.PORT || 3000;
 require('dotenv').config();
 const WebpayPlus = require('transbank-sdk').WebpayPlus;
 const Transaction = WebpayPlus.Transaction;
+const { Options, Environment } = require('transbank-sdk');
+
+// Configuración para ambiente de integración
+WebpayPlus.configureForIntegration(
+    process.env.WEBPAY_COMMERCE_CODE || '597055555532',
+    process.env.WEBPAY_API_KEY || '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C'
+);
 
 // Configuración de la base de datos como constante
 const dbConfig = {
@@ -352,25 +359,47 @@ app.delete('/api/Productos/:id', async (req, res) => {
 // Configurar Webpay
 WebpayPlus.configureForTesting();
 
-// Agregar la ruta para crear transacción
+// Modificar la ruta de crear transacción
 app.post('/crear-transaccion', async (req, res) => {
     try {
         const { total, email } = req.body;
         
+        // Validar que el total sea un número válido
+        if (!total || isNaN(total)) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'El monto total es requerido y debe ser un número válido' 
+            });
+        }
+
+        // Agregar logs para debugging
+        console.log('Iniciando creación de transacción:', { total, email });
+
+        const buyOrder = 'orden_' + Date.now();
+        const sessionId = 'sesion_' + Date.now();
+        const returnUrl = 'https://reci-clothes.vercel.app/confirmar-pago';
+
         const createResponse = await Transaction.create(
-            'orden_' + Date.now(),
-            'sesion_' + Date.now(),
-            total,
-            'https://reci-clothes.vercel.app/confirmar-pago'
+            buyOrder,
+            sessionId,
+            parseInt(total), // Asegurarse de que el total sea un entero
+            returnUrl
         );
 
+        console.log('Respuesta de Webpay:', createResponse);
+
         res.json({
+            success: true,
             url: createResponse.url,
             token: createResponse.token
         });
     } catch (error) {
-        console.error('Error al crear transacción:', error);
-        res.status(500).json({ error: 'Error al procesar el pago' });
+        console.error('Error detallado al crear transacción:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Error al procesar el pago',
+            details: error.message 
+        });
     }
 });
 
