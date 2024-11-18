@@ -349,7 +349,7 @@ app.delete('/api/Productos/:id', async (req, res) => {
 });
 
 // Agrega esta nueva ruta para crear preferencias de pago
-app.post('/crear-preferencia', async (req, res) => {
+app.get('/crear-preferencia', async (req, res) => {
     console.log('Iniciando creación de preferencia de pago...'); // Mensaje agregado
     
     mercadopago.configure({
