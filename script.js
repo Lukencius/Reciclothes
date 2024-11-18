@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
+    const category = document.getElementById('category');
+    const title = document.getElementById('title'); 
     const searchInput = document.getElementById('searchInput');
     const searchResults = document.getElementById('searchResults');
     let productos = []; // Array para almacenar todos los productos
@@ -6,19 +8,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cargar productos al inicio
     cargarProductos();
 
-    // Función para cargar productos
-    async function cargarProductos() {
-        try {
-            const response = await fetch('https://reciclothes.onrender.com/api/productos');
-            if (!response.ok) {
-                throw new Error('Error al cargar productos');
+    // Evento para filtrar productos por categoría
+    category.addEventListener('click', function(e) {
+        if (e.target.classList.contains('dropdown-item')) {
+            let selectedCategory = e.target.textContent;
+            title.innerHTML = selectedCategory;
+            if(selectedCategory === 'Niños') {
+                selectedCategory = 'Ninos' 
+                filtrarProductos(selectedCategory); 
             }
-            productos = await response.json();
-            console.log('Productos cargados:', productos); // Para depuración
-        } catch (error) {
-            console.error('Error:', error);
+            filtrarProductos(selectedCategory);
         }
-    }
+    });
 
     // Evento input para la búsqueda
     searchInput.addEventListener('input', function(e) {
@@ -63,6 +64,50 @@ document.addEventListener('DOMContentLoaded', function() {
             searchResults.style.display = 'none';
         }
     });
+
+    // Función para cargar productos
+    async function cargarProductos() {
+        try {
+            const response = await fetch('https://reciclothes.onrender.com/api/productos');
+            if (!response.ok) {
+                throw new Error('Error al cargar productos');
+            }
+            productos = await response.json();
+            console.log('Productos cargados:', productos); // Para depuración
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // Función para filtrar productos por categoría
+    async function filtrarProductos(category) {
+        const filteredProducts = productos.filter(producto => producto.category === category);
+        mostrarProductos(filteredProducts);
+    }
+
+    // Función para mostrar productos
+    function mostrarProductos(productos) {
+        const productosContainer = document.getElementById('productosContainer');
+        if (!productosContainer) return;
+
+        productosContainer.innerHTML = productos.map(producto => {
+            const imgSrc = producto.imagen || 'media/polera.png';
+            return `
+                <div class="col-md-4 mb-4">
+                    <div class="card product-card" style="cursor: pointer;" onclick="verDetalleProducto(${JSON.stringify(producto).replace(/"/g, '&quot;')})">
+                        <img src="${imgSrc}" class="card-img-top product-card-img" alt="${producto.name}" onerror="this.src='media/polera.png'">
+                        <div class="card-body">
+                            <h5 class="card-title">${producto.name}</h5>
+                            <p class="card-text">${producto.description}</p>
+                            <p class="card-text"><strong>Precio: $${producto.price.toLocaleString('es-CL')}</strong></p>
+                            <p class="card-text">Categoría: ${producto.category}</p>
+                            <p class="card-text">Stock: ${producto.stock}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
 });
 
 // Función para verificar si la API está respondiendo
@@ -80,4 +125,3 @@ async function verificarAPI() {
 
 // Verificar API al cargar la página
 verificarAPI();
-
