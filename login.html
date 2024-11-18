@@ -3,68 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - RECICLOTHES</title>
+    <title>Iniciar Sesión</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <!-- Fondo decorativo -->
-    <div class="eco-background">
-        <i class="fas fa-leaf eco-leaf" style="top: 10%; left: 10%;"></i>
-        <i class="fas fa-recycle eco-leaf" style="top: 30%; right: 15%;"></i>
-        <i class="fas fa-seedling eco-leaf" style="bottom: 20%; left: 20%;"></i>
-        <i class="fas fa-leaf eco-leaf" style="bottom: 30%; right: 10%;"></i>
-    </div>
-
-    <div class="container auth-container">
-        <div class="row justify-content-center">
-            <div class="col-md-7">
-                <div class="card shadow auth-card">
-                    <div class="card-body p-3">
-                        <div class="text-center mb-4">
-                            <img src="media/ReciClothes_sinf.png" alt="Reciclothes Logo" class="brand-logo">
-                            <h2 class="auth-title">Bienvenido</h2>
-                            <p class="auth-subtitle">Continúa tu viaje en la moda sostenible</p>
-                        </div>
-                        
-                        <div id="message" class="message-box"></div>
-                        
-                        <form id="loginForm" class="login-form">
-                            <div class="mb-1">
-                                <label for="email" class="form-label">
-                                    <i class="fas fa-envelope me-2"></i>Email
-                                </label>
-                                <input type="email" 
-                                       class="form-control" 
-                                       id="email" 
-                                       name="email" 
-                                       required>
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">Iniciar Sesión</h2>
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Correo electrónico:</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
                             </div>
-                            
-                            <div class="mb-1">
-                                <label for="password" class="form-label">
-                                    <i class="fas fa-lock me-2"></i>Contraseña
-                                </label>
-                                <input type="password" 
-                                       class="form-control" 
-                                       id="password" 
-                                       name="password" 
-                                       required>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Contraseña:</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
                             </div>
-
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="remember">
-                                <label class="form-check-label" for="remember">Recordar sesión</label>
-                            </div>
-
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary">
-                                    Iniciar Sesión
-                                </button>
-                                <a href="signup.html" class="btn btn-secondary">
-                                    Crear Cuenta Nueva
-                                </a>
+                                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                                <a href="signup.html" class="btn btn-secondary">Registrar nueva cuenta</a>
                             </div>
                         </form>
                     </div>
@@ -73,8 +34,71 @@
         </div>
     </div>
 
+    <!-- Bootstrap JS y Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
-    <script src="Script.js"></script>
+
+
+    <!-- script para conectar con el servidor -->
+    <script>
+        const API_URL = 'https://reciclothes.onrender.com'; // Cambia esto por tu URL de Render
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Guardar token y datos del usuario
+                    localStorage.setItem('userToken', data.token);
+                    localStorage.setItem('userData', JSON.stringify(data.user));
+                    
+                    // Verificar si es admin
+                    if (email.toLowerCase() === 'jimena@admin.com') {
+                        const adminToken = btoa(Date.now() + '-admin-' + Math.random());
+                        localStorage.setItem('adminToken', adminToken);
+                        window.location.href = 'admin.html?token=' + encodeURIComponent(adminToken);
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Correo electrónico o contraseña incorrectos');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al conectar con el servidor');
+            }
+        });
+
+        // Función para verificar si ya hay una sesión activa
+        function checkExistingSession() {
+            const token = localStorage.getItem('userToken');
+            const userData = localStorage.getItem('userData');
+            
+            if (token && userData) {
+                const user = JSON.parse(userData);
+                if (user.email === 'jimena@admin.com') {
+                    window.location.href = 'admin.html?token=' + localStorage.getItem('adminToken');
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }
+        }
+
+        // Verificar sesión al cargar la página
+        window.onload = checkExistingSession;
+    </script>
 </body>
 </html>

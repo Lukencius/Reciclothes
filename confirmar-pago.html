@@ -15,7 +15,6 @@
             justify-content: center;
             align-items: center;
         }
-
         .container {
             background-color: white;
             padding: 2rem;
@@ -25,12 +24,11 @@
             width: 100%;
             text-align: center;
         }
-
+        
         .status-icon {
             font-size: 4rem;
             margin-bottom: 1rem;
         }
-
         .success { color: #28a745; }
         .error { color: #dc3545; }
 
@@ -134,7 +132,7 @@
             loading.style.display = 'block';
 
             try {
-                const response = await fetch('https://reciclothes.onrender.com/confirmar-transaccion', {
+                const response = await fetch('/confirmar-transaccion', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
