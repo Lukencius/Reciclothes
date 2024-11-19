@@ -156,6 +156,46 @@ const checkTable = async (tableName, createTableSQL = null) => {
     }
 };
 
+// Crear tablas de órdenes si no existen
+const createOrderTables = async () => {
+    const connection = await createDbConnection();
+    try {
+        // Crear tabla de órdenes con ID de orden personalizado
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS ordenes (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                orden_id VARCHAR(50) UNIQUE NOT NULL,
+                usuario_id INT,
+                nombre VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                direccion TEXT NOT NULL,
+                telefono VARCHAR(20) NOT NULL,
+                total DECIMAL(10,2) NOT NULL,
+                estado VARCHAR(50) DEFAULT 'Pendiente',
+                fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES clientes(id)
+            )
+        `);
+
+        // Crear tabla de detalles de orden
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS orden_detalles (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                orden_id INT,
+                producto_id INT,
+                cantidad INT NOT NULL,
+                precio_unitario DECIMAL(10,2) NOT NULL,
+                FOREIGN KEY (orden_id) REFERENCES ordenes(id) ON DELETE CASCADE,
+                FOREIGN KEY (producto_id) REFERENCES Productos(Id_Producto)
+            )
+        `);
+    } catch (error) {
+        console.error('Error al crear tablas de órdenes:', error);
+    } finally {
+        await connection.end();
+    }
+};
+
 // Inicialización de la base de datos
 const initDatabase = async () => {
     await createDbConnection()
@@ -163,18 +203,8 @@ const initDatabase = async () => {
         .catch(error => console.error('Error al conectar a la base de datos:', error));
 
     await checkTable('clientes');
-    await checkTable('Productos', `
-        CREATE TABLE IF NOT EXISTS Productos (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(100) NOT NULL,
-            description TEXT,
-            category VARCHAR(50),
-            price DECIMAL(10,2) NOT NULL,
-            stock INT DEFAULT 0,
-            imagen VARCHAR(500),  // Cambiado de BLOB a VARCHAR para almacenar URLs
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
+    await checkTable('Productos');
+    await createOrderTables();
 };
 
 initDatabase();
@@ -397,5 +427,139 @@ app.post('/confirmar-transaccion', async (req, res) => {
             success: false,
             message: 'Error al procesar la confirmación del pago'
         });
+    }
+});
+
+// Ruta para crear una nueva orden
+app.post('/api/ordenes', authenticateToken, async (req, res) => {
+    const connection = await createDbConnection();
+    try {
+        await connection.beginTransaction();
+
+        const { nombre, email, direccion, telefono, total, items } = req.body;
+        
+        // Generar ID de orden único (formato: ORD-YYYYMMDD-XXXX)
+        const fecha = new Date();
+        const fechaStr = fecha.getFullYear().toString() +
+                        (fecha.getMonth() + 1).toString().padStart(2, '0') +
+                        fecha.getDate().toString().padStart(2, '0');
+        const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        const ordenId = `ORD-${fechaStr}-${randomNum}`;
+        
+        // Validar stock antes de procesar la orden
+        for (const item of items) {
+            const [stockResult] = await connection.execute(
+                'SELECT stock FROM Productos WHERE Id_Producto = ?',
+                [item.productoId]
+            );
+            
+            if (stockResult.length === 0 || stockResult[0].stock < item.cantidad) {
+                throw new Error(`Stock insuficiente para el producto ${item.productoId}`);
+            }
+        }
+
+        // Insertar la orden con el ID personalizado
+        const [ordenResult] = await connection.execute(
+            'INSERT INTO ordenes (orden_id, usuario_id, nombre, email, direccion, telefono, total) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [ordenId, req.user.id, nombre, email, direccion, telefono, total]
+        );
+
+        // Insertar los detalles y actualizar stock
+        for (const item of items) {
+            await connection.execute(
+                'INSERT INTO orden_detalles (orden_id, producto_id, cantidad, precio_unitario) VALUES (?, ?, ?, ?)',
+                [ordenResult.insertId, item.productoId, item.cantidad, item.precioUnitario]
+            );
+
+            await connection.execute(
+                'UPDATE Productos SET stock = stock - ? WHERE Id_Producto = ?',
+                [item.cantidad, item.productoId]
+            );
+        }
+
+        await connection.commit();
+        
+        res.json({
+            success: true,
+            message: 'Orden creada exitosamente',
+            ordenId: ordenId, // Devolver el ID personalizado
+            id: ordenResult.insertId // También devolver el ID numérico si es necesario
+        });
+
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error al crear la orden:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Error al procesar la orden'
+        });
+    } finally {
+        await connection.end();
+    }
+});
+
+// Ruta para obtener órdenes de un usuario
+app.get('/api/ordenes', authenticateToken, async (req, res) => {
+    const connection = await createDbConnection();
+    try {
+        const [ordenes] = await connection.execute(
+            `SELECT o.*, 
+                    GROUP_CONCAT(CONCAT(od.cantidad, 'x ', p.name) SEPARATOR ', ') as productos
+             FROM ordenes o 
+             LEFT JOIN orden_detalles od ON o.id = od.orden_id 
+             LEFT JOIN Productos p ON od.producto_id = p.Id_Producto
+             WHERE o.usuario_id = ?
+             GROUP BY o.id
+             ORDER BY o.fecha_creacion DESC`,
+            [req.user.id]
+        );
+
+        res.json({
+            success: true,
+            ordenes: ordenes
+        });
+    } catch (error) {
+        console.error('Error al obtener órdenes:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener las órdenes'
+        });
+    } finally {
+        await connection.end();
+    }
+});
+
+// Ruta para obtener detalles de una orden específica
+app.get('/api/ordenes/:id', authenticateToken, async (req, res) => {
+    const connection = await createDbConnection();
+    try {
+        const [orden] = await connection.execute(
+            `SELECT o.*, od.producto_id, od.cantidad, od.precio_unitario, p.name as producto_nombre
+             FROM ordenes o 
+             LEFT JOIN orden_detalles od ON o.id = od.orden_id 
+             LEFT JOIN Productos p ON od.producto_id = p.Id_Producto
+             WHERE o.id = ? AND o.usuario_id = ?`,
+            [req.params.id, req.user.id]
+        );
+
+        if (orden.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Orden no encontrada'
+            });
+        }
+
+        res.json({
+            success: true,
+            orden: orden
+        });
+    } catch (error) {
+        console.error('Error al obtener detalles de la orden:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener los detalles de la orden'
+        });
+    } finally {
+        await connection.end();
     }
 });

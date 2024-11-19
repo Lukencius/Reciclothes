@@ -109,30 +109,23 @@
                     <form id="formularioPago">
                         <div class="mb-3">
                             <label class="form-label">Nombre Completo</label>
-                            <input type="text" class="form-control" required>
+                            <input type="text" name="nombre" class="form-control" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Dirección de Envío</label>
-                            <input type="text" id="direccionInput" class="form-control" required>
+                            <input type="text" name="direccion" id="direccionInput" class="form-control" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Número de Casa/Depto</label>
-                            <input type="text" id="numeroCasa" class="form-control" required placeholder="Ej: 123 Depto 45">
+                            <input type="text" name="numeroCasa" id="numeroCasa" class="form-control" required placeholder="Ej: 123 Depto 45">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Correo Electrónico</label>
-                            <input type="email" class="form-control" required>
+                            <input type="email" name="email" class="form-control" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Teléfono</label>
-                            <input type="tel" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Método de Pago</label>
-                            <select class="form-control" id="metodoPago" required>
-                                <option value="">Seleccione método de pago</option>
-                                <option value="webpay">Webpay Plus (Débito/Crédito)</option>
-                            </select>
+                            <input type="tel" name="telefono" class="form-control" required>
                         </div>
                         <button type="submit" class="btn btn-success w-100">Proceder al Pago</button>
                     </form>
@@ -283,60 +276,7 @@
             
             const modal = new bootstrap.Modal(document.getElementById('formularioPagoModal'));
             modal.show();
-        }
-
-        async function procesarCompra(event) {
-            event.preventDefault();
-            
-            const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-            const total = carrito.reduce((sum, item) => sum + (item.price * item.cantidad), 0);
-            
-            const formData = new FormData(event.target);
-            const datosCompra = {
-                nombre: formData.get('nombre'),
-                email: formData.get('email'),
-                direccion: formData.get('direccion'),
-                telefono: formData.get('telefono'),
-                metodoPago: document.getElementById('metodoPago').value,
-                total: total,
-                items: carrito
-            };
-
-            if (datosCompra.metodoPago === 'webpay') {
-                try {
-                    // Llamada a tu API para iniciar la transacción
-                    const response = await fetch('tu-api/crear-transaccion', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(datosCompra)
-                    });
-
-                    const data = await response.json();
-
-                    if (data.url && data.token) {
-                        // Crear formulario para redirección a Webpay
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = data.url;
-
-                        const tokenInput = document.createElement('input');
-                        tokenInput.type = 'hidden';
-                        tokenInput.name = 'token_ws';
-                        tokenInput.value = data.token;
-
-                        form.appendChild(tokenInput);
-                        document.body.appendChild(form);
-                        form.submit();
-                    } else {
-                        throw new Error('Error al procesar el pago');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Hubo un error al procesar el pago. Por favor intente nuevamente.');
-                }
-            }
+            prellenarFormulario();
         }
 
         // Reemplazar la función inicializarAutocompletado
@@ -461,8 +401,15 @@
             mostrarUsuarioActual();
             if (verificarSesion()) {
                 cargarCarrito();
-                document.getElementById('formularioPago').addEventListener('submit', procesarCompra);
+                const formularioPago = document.getElementById('formularioPago');
+                formularioPago.addEventListener('submit', procesarCompra);
                 inicializarAutocompletado();
+                
+                // Limpiar formulario cuando se cierra el modal
+                const modal = document.getElementById('formularioPagoModal');
+                modal.addEventListener('hidden.bs.modal', () => {
+                    formularioPago.reset();
+                });
             }
         });
 
@@ -500,6 +447,74 @@
 
         // Ejecutar cuando se carga la página
         window.addEventListener('load', actualizarBotonLogin);
+
+        async function procesarCompra(event) {
+            event.preventDefault();
+            
+            try {
+                const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+                const token = localStorage.getItem('userToken');
+                const total = carrito.reduce((sum, item) => sum + (item.price * item.cantidad), 0);
+                
+                const formData = new FormData(event.target);
+                const datosCompra = {
+                    nombre: formData.get('nombre'),
+                    email: formData.get('email'),
+                    direccion: `${formData.get('direccion')} ${document.getElementById('numeroCasa').value}`,
+                    telefono: formData.get('telefono'),
+                    total: total,
+                    items: carrito.map(item => ({
+                        productoId: item.Id_Producto,
+                        cantidad: item.cantidad,
+                        precioUnitario: item.price
+                    }))
+                };
+
+                const response = await fetch('https://reciclothes.onrender.com/api/ordenes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(datosCompra)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Error al procesar la orden');
+                }
+
+                const resultado = await response.json();
+                
+                if (resultado.success) {
+                    // Cerrar el modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('formularioPagoModal'));
+                    modal.hide();
+                    
+                    // Mostrar mensaje de éxito
+                    alert(`¡Compra procesada con éxito!\nTu número de orden es: ${resultado.ordenId}`);
+                    
+                    // Limpiar carrito y redireccionar
+                    localStorage.removeItem('carrito');
+                    window.location.href = 'index.html';
+                } else {
+                    throw new Error(resultado.message || 'Error al procesar la orden');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al procesar la compra: ' + error.message);
+            }
+        }
+
+        function prellenarFormulario() {
+            const userData = JSON.parse(localStorage.getItem('userData'));
+            if (userData) {
+                const form = document.getElementById('formularioPago');
+                form.querySelector('[name="nombre"]').value = userData.name || '';
+                form.querySelector('[name="email"]').value = userData.email || '';
+                form.querySelector('[name="telefono"]').value = userData.phone || '';
+            }
+        }
     </script>
 </body>
 </html>
