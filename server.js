@@ -422,73 +422,64 @@ app.post('/api/ordenes', authenticateToken, async (req, res) => {
     }
 });
 
-// Endpoint para obtener todas las órdenes
-app.get('/api/ordenes', authenticateToken, async (req, res) => {
-    const connection = await createDbConnection();
+// Ruta para obtener una orden específica
+app.get('/api/ordenes/:id', async (req, res) => {
     try {
-        const [rows] = await connection.execute(
-            'SELECT * FROM ordenes ORDER BY order_date DESC'
+        const connection = await mysql.createConnection(dbConfig);
+        const [orden] = await connection.execute(
+            'SELECT * FROM ordenes WHERE Id_Orden = ?',
+            [req.params.id]
         );
-
-        // Parsear el JSON de productos para cada orden
-        const ordenes = rows.map(orden => ({
-            ...orden,
-            products: JSON.parse(orden.products)
-        }));
-
-        res.json({
-            success: true,
-            ordenes
-        });
-
-    } catch (error) {
-        console.error('Error al obtener las órdenes:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al obtener las órdenes',
-            error: error.message
-        });
-    } finally {
         await connection.end();
-    }
-});
-
-// Endpoint para obtener una orden específica
-app.get('/api/ordenes/:id', authenticateToken, async (req, res) => {
-    const connection = await createDbConnection();
-    try {
-        const [rows] = await connection.execute(
-            'SELECT * FROM ordenes WHERE Id_Orden = ? AND email = ?',
-            [req.params.id, req.user.email]
-        );
-
-        if (rows.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Orden no encontrada'
-            });
+        
+        if (orden.length === 0) {
+            return res.status(404).json({ error: 'Orden no encontrada' });
         }
-
-        // Parsear el JSON de productos
-        const orden = {
-            ...rows[0],
-            products: JSON.parse(rows[0].products)
-        };
-
-        res.json({
-            success: true,
-            orden
-        });
-
+        res.json(orden[0]);
     } catch (error) {
         console.error('Error al obtener la orden:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al obtener la orden',
-            error: error.message
-        });
-    } finally {
-        await connection.end();
+        res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
 
+// Ruta para actualizar el estado de una orden
+app.put('/api/ordenes/:id/estado', async (req, res) => {
+    const { estado } = req.body;
+    const { id } = req.params;
+
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        await connection.execute(
+            'UPDATE ordenes SET estado = ? WHERE Id_Orden = ?',
+            [estado, id]
+        );
+        await connection.end();
+        res.json({ message: 'Estado actualizado correctamente' });
+    } catch (error) {
+        console.error('Error al actualizar el estado:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+// Ruta para crear una nueva orden
+app.post('/api/ordenes', async (req, res) => {
+    const { cliente, email, telefono, products, total_amount } = req.body;
+
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        const [result] = await connection.execute(
+            `INSERT INTO ordenes (cliente, email, telefono, products, total_amount) 
+             VALUES (?, ?, ?, ?, ?)`,
+            [cliente, email, telefono, products, total_amount]
+        );
+        await connection.end();
+
+        res.status(201).json({
+            message: 'Orden creada exitosamente',
+            Id_Orden: result.insertId
+        });
+    } catch (error) {
+        console.error('Error al crear la orden:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
