@@ -461,12 +461,13 @@ app.put('/api/ordenes/:id/estado', async (req, res) => {
 });
 
 app.get('/api/ordenes', async (req, res) => {
+    let connection;
     try {
-        const connection = await mysql.createConnection(dbConfig);
+        connection = await mysql.createConnection(dbConfig);
         const [ordenes] = await connection.execute(`
             SELECT 
                 Id_Orden,
-                cliente,
+                cliente, 
                 email,
                 telefono,
                 products,
@@ -476,10 +477,17 @@ app.get('/api/ordenes', async (req, res) => {
             FROM ordenes
             ORDER BY order_date DESC
         `);
-        await connection.end();
         res.json(ordenes);
     } catch (error) {
         console.error('Error al obtener las órdenes:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ 
+            success: false,
+            mensaje: 'Error al obtener las órdenes',
+            error: error.message 
+        });
+    } finally {
+        if (connection) {
+            await connection.end();
+        }
     }
 });
