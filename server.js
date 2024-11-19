@@ -160,7 +160,11 @@ const checkTable = async (tableName, createTableSQL = null) => {
 const createOrderTables = async () => {
     const connection = await createDbConnection();
     try {
-        // Crear tabla de órdenes con ID de orden personalizado
+        // Primero verificamos la estructura de la tabla clientes
+        const [clientesColumns] = await connection.execute('SHOW COLUMNS FROM clientes');
+        const idColumnName = clientesColumns.find(col => col.Key === 'PRI')?.Field;
+
+        // Crear tabla de órdenes con la referencia correcta
         await connection.execute(`
             CREATE TABLE IF NOT EXISTS ordenes (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -173,7 +177,7 @@ const createOrderTables = async () => {
                 total DECIMAL(10,2) NOT NULL,
                 estado VARCHAR(50) DEFAULT 'Pendiente',
                 fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (usuario_id) REFERENCES clientes(id)
+                FOREIGN KEY (usuario_id) REFERENCES clientes(${idColumnName})
             )
         `);
 
@@ -189,8 +193,11 @@ const createOrderTables = async () => {
                 FOREIGN KEY (producto_id) REFERENCES Productos(Id_Producto)
             )
         `);
+
+        console.log('Tablas de órdenes creadas exitosamente');
     } catch (error) {
         console.error('Error al crear tablas de órdenes:', error);
+        throw error; // Propagar el error para mejor debugging
     } finally {
         await connection.end();
     }
