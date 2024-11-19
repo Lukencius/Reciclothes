@@ -462,10 +462,9 @@
                     throw new Error('No hay sesión activa');
                 }
 
-                const total = carrito.reduce((sum, item) => sum + (item.price * item.cantidad), 0);
                 const formData = new FormData(event.target);
                 
-                // Validar que todos los campos requeridos tengan valor
+                // Validar campos requeridos
                 const camposRequeridos = ['nombre', 'email', 'direccion', 'telefono'];
                 for (const campo of camposRequeridos) {
                     if (!formData.get(campo)) {
@@ -473,26 +472,19 @@
                     }
                 }
 
-                const datosCompra = {
-                    nombre: formData.get('nombre').trim(),
+                // Crear objeto con el formato de la tabla orden
+                const datosOrden = {
+                    cliente: formData.get('nombre').trim(),
                     email: formData.get('email').trim(),
-                    direccion: `${formData.get('direccion').trim()} ${document.getElementById('numeroCasa').value.trim()}`.trim(),
                     telefono: formData.get('telefono').trim(),
-                    total: total,
-                    items: carrito.map(item => ({
-                        productoId: parseInt(item.Id_Producto),
-                        cantidad: parseInt(item.cantidad),
-                        precioUnitario: parseFloat(item.price)
-                    }))
+                    products: carrito.map(item => ({
+                        id: item.Id_Producto,
+                        cantidad: item.cantidad
+                    })),
+                    order_date: new Date().toISOString(),
+                    total_amount: carrito.reduce((sum, item) => sum + (item.price * item.cantidad), 0),
+                    estado: 'pendiente'
                 };
-
-                // Validar que todos los items tengan valores válidos
-                if (!datosCompra.items.every(item => 
-                    item.productoId && 
-                    item.cantidad > 0 && 
-                    item.precioUnitario > 0)) {
-                    throw new Error('Datos de productos inválidos');
-                }
 
                 const response = await fetch('https://reciclothes.onrender.com/api/ordenes', {
                     method: 'POST',
@@ -500,7 +492,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify(datosCompra)
+                    body: JSON.stringify(datosOrden)
                 });
 
                 if (!response.ok) {
@@ -511,14 +503,9 @@
                 const resultado = await response.json();
                 
                 if (resultado.success) {
-                    // Cerrar el modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('formularioPagoModal'));
                     modal.hide();
-                    
-                    // Mostrar mensaje de éxito
-                    alert(`¡Compra procesada con éxito!\nTu número de orden es: ${resultado.ordenId}`);
-                    
-                    // Limpiar carrito y redireccionar
+                    alert(`¡Compra procesada con éxito!\nTu número de orden es: ${resultado.Id_Orden}`);
                     localStorage.removeItem('carrito');
                     window.location.href = 'index.html';
                 } else {

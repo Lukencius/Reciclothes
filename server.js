@@ -160,44 +160,24 @@ const checkTable = async (tableName, createTableSQL = null) => {
 const createOrderTables = async () => {
     const connection = await createDbConnection();
     try {
-        // Primero verificamos la estructura de la tabla clientes
-        const [clientesColumns] = await connection.execute('SHOW COLUMNS FROM clientes');
-        const idColumnName = clientesColumns.find(col => col.Key === 'PRI')?.Field;
-
-        // Crear tabla de órdenes con la referencia correcta
+        // Crear tabla de órdenes según la estructura mostrada
         await connection.execute(`
             CREATE TABLE IF NOT EXISTS ordenes (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                orden_id VARCHAR(50) UNIQUE NOT NULL,
-                usuario_id INT,
-                nombre VARCHAR(255) NOT NULL,
+                Id_Orden INT AUTO_INCREMENT PRIMARY KEY,
+                cliente VARCHAR(255) NOT NULL,
                 email VARCHAR(255) NOT NULL,
-                direccion TEXT NOT NULL,
                 telefono VARCHAR(20) NOT NULL,
-                total DECIMAL(10,2) NOT NULL,
-                estado VARCHAR(50) DEFAULT 'Pendiente',
-                fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (usuario_id) REFERENCES clientes(${idColumnName})
+                products TEXT NOT NULL,
+                order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                total_amount DECIMAL(10,2) NOT NULL,
+                estado VARCHAR(50) DEFAULT 'Pendiente'
             )
         `);
 
-        // Crear tabla de detalles de orden
-        await connection.execute(`
-            CREATE TABLE IF NOT EXISTS orden_detalles (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                orden_id INT,
-                producto_id INT,
-                cantidad INT NOT NULL,
-                precio_unitario DECIMAL(10,2) NOT NULL,
-                FOREIGN KEY (orden_id) REFERENCES ordenes(id) ON DELETE CASCADE,
-                FOREIGN KEY (producto_id) REFERENCES Productos(Id_Producto)
-            )
-        `);
-
-        console.log('Tablas de órdenes creadas exitosamente');
+        console.log('Tabla de órdenes creada exitosamente');
     } catch (error) {
-        console.error('Error al crear tablas de órdenes:', error);
-        throw error; // Propagar el error para mejor debugging
+        console.error('Error al crear tabla de órdenes:', error);
+        throw error;
     } finally {
         await connection.end();
     }
@@ -381,192 +361,137 @@ app.delete('/api/Productos/:id', async (req, res) => {
     }
 });
 
-// Configurar Webpay
-WebpayPlus.configureForTesting();
-
-// Agregar la ruta para crear transacción
-app.post('/crear-transaccion', async (req, res) => {
-    try {
-        const { total, email } = req.body;
-        
-        const createResponse = await Transaction.create(
-            'orden_' + Date.now(),
-            'sesion_' + Date.now(),
-            total,
-            'https://reci-clothes.vercel.app/confirmar-pago'
-        );
-
-        res.json({
-            url: createResponse.url,
-            token: createResponse.token
-        });
-    } catch (error) {
-        console.error('Error al crear transacción:', error);
-        res.status(500).json({ error: 'Error al procesar el pago' });
-    }
-});
-
-// Ruta para confirmar la transacción
-app.post('/confirmar-transaccion', async (req, res) => {
-    try {
-        const { token_ws } = req.body;
-        
-        // Confirmar la transacción con Webpay
-        const confirmResponse = await Transaction.commit(token_ws);
-        
-        // Verificar el estado de la transacción
-        if (confirmResponse.status === 'AUTHORIZED') {
-            res.json({
-                success: true,
-                ordenId: confirmResponse.buy_order,
-                amount: confirmResponse.amount,
-                message: 'Pago procesado correctamente'
-            });
-        } else {
-            res.json({
-                success: false,
-                message: 'La transacción no fue autorizada'
-            });
-        }
-    } catch (error) {
-        console.error('Error al confirmar transacción:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al procesar la confirmación del pago'
-        });
-    }
-});
-
-// Ruta para crear una nueva orden
+// Endpoint para crear una nueva orden
 app.post('/api/ordenes', authenticateToken, async (req, res) => {
     const connection = await createDbConnection();
     try {
-        await connection.beginTransaction();
+        const { cliente, email, telefono, products, total_amount } = req.body;
 
-        const { nombre, email, direccion, telefono, total, items } = req.body;
-        
-        // Generar ID de orden único (formato: ORD-YYYYMMDD-XXXX)
-        const fecha = new Date();
-        const fechaStr = fecha.getFullYear().toString() +
-                        (fecha.getMonth() + 1).toString().padStart(2, '0') +
-                        fecha.getDate().toString().padStart(2, '0');
-        const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-        const ordenId = `ORD-${fechaStr}-${randomNum}`;
-        
-        // Validar stock antes de procesar la orden
-        for (const item of items) {
-            const [stockResult] = await connection.execute(
-                'SELECT stock FROM Productos WHERE Id_Producto = ?',
-                [item.productoId]
-            );
-            
-            if (stockResult.length === 0 || stockResult[0].stock < item.cantidad) {
-                throw new Error(`Stock insuficiente para el producto ${item.productoId}`);
-            }
+        // Validar datos requeridos
+        if (!cliente || !email || !telefono || !products || !total_amount) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Faltan datos requeridos para la orden' 
+            });
         }
 
-        // Insertar la orden con el ID personalizado
-        const [ordenResult] = await connection.execute(
-            'INSERT INTO ordenes (orden_id, usuario_id, nombre, email, direccion, telefono, total) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [ordenId, req.user.id, nombre, email, direccion, telefono, total]
+        // Convertir el array de productos a JSON string
+        const productsJSON = JSON.stringify(products);
+
+        // Insertar la orden
+        const [result] = await connection.execute(
+            `INSERT INTO ordenes (
+                cliente, 
+                email, 
+                telefono, 
+                products, 
+                total_amount, 
+                estado
+            ) VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+                cliente, 
+                email, 
+                telefono, 
+                productsJSON, 
+                total_amount, 
+                'Pendiente'
+            ]
         );
 
-        // Insertar los detalles y actualizar stock
-        for (const item of items) {
-            await connection.execute(
-                'INSERT INTO orden_detalles (orden_id, producto_id, cantidad, precio_unitario) VALUES (?, ?, ?, ?)',
-                [ordenResult.insertId, item.productoId, item.cantidad, item.precioUnitario]
-            );
-
+        // Actualizar el stock de los productos
+        for (const product of products) {
             await connection.execute(
                 'UPDATE Productos SET stock = stock - ? WHERE Id_Producto = ?',
-                [item.cantidad, item.productoId]
+                [product.cantidad, product.id]
             );
         }
 
-        await connection.commit();
-        
         res.json({
             success: true,
             message: 'Orden creada exitosamente',
-            ordenId: ordenId, // Devolver el ID personalizado
-            id: ordenResult.insertId // También devolver el ID numérico si es necesario
+            Id_Orden: result.insertId
         });
 
     } catch (error) {
-        await connection.rollback();
         console.error('Error al crear la orden:', error);
         res.status(500).json({
             success: false,
-            message: error.message || 'Error al procesar la orden'
+            message: 'Error al procesar la orden',
+            error: error.message
         });
     } finally {
         await connection.end();
     }
 });
 
-// Ruta para obtener órdenes de un usuario
+// Endpoint para obtener todas las órdenes de un usuario
 app.get('/api/ordenes', authenticateToken, async (req, res) => {
     const connection = await createDbConnection();
     try {
-        const [ordenes] = await connection.execute(
-            `SELECT o.*, 
-                    GROUP_CONCAT(CONCAT(od.cantidad, 'x ', p.name) SEPARATOR ', ') as productos
-             FROM ordenes o 
-             LEFT JOIN orden_detalles od ON o.id = od.orden_id 
-             LEFT JOIN Productos p ON od.producto_id = p.Id_Producto
-             WHERE o.usuario_id = ?
-             GROUP BY o.id
-             ORDER BY o.fecha_creacion DESC`,
-            [req.user.id]
+        const [rows] = await connection.execute(
+            'SELECT * FROM ordenes WHERE email = ? ORDER BY order_date DESC',
+            [req.user.email]
         );
+
+        // Parsear el JSON de productos para cada orden
+        const ordenes = rows.map(orden => ({
+            ...orden,
+            products: JSON.parse(orden.products)
+        }));
 
         res.json({
             success: true,
-            ordenes: ordenes
+            ordenes
         });
+
     } catch (error) {
-        console.error('Error al obtener órdenes:', error);
+        console.error('Error al obtener las órdenes:', error);
         res.status(500).json({
             success: false,
-            message: 'Error al obtener las órdenes'
+            message: 'Error al obtener las órdenes',
+            error: error.message
         });
     } finally {
         await connection.end();
     }
 });
 
-// Ruta para obtener detalles de una orden específica
+// Endpoint para obtener una orden específica
 app.get('/api/ordenes/:id', authenticateToken, async (req, res) => {
     const connection = await createDbConnection();
     try {
-        const [orden] = await connection.execute(
-            `SELECT o.*, od.producto_id, od.cantidad, od.precio_unitario, p.name as producto_nombre
-             FROM ordenes o 
-             LEFT JOIN orden_detalles od ON o.id = od.orden_id 
-             LEFT JOIN Productos p ON od.producto_id = p.Id_Producto
-             WHERE o.id = ? AND o.usuario_id = ?`,
-            [req.params.id, req.user.id]
+        const [rows] = await connection.execute(
+            'SELECT * FROM ordenes WHERE Id_Orden = ? AND email = ?',
+            [req.params.id, req.user.email]
         );
 
-        if (orden.length === 0) {
+        if (rows.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: 'Orden no encontrada'
             });
         }
 
+        // Parsear el JSON de productos
+        const orden = {
+            ...rows[0],
+            products: JSON.parse(rows[0].products)
+        };
+
         res.json({
             success: true,
-            orden: orden
+            orden
         });
+
     } catch (error) {
-        console.error('Error al obtener detalles de la orden:', error);
+        console.error('Error al obtener la orden:', error);
         res.status(500).json({
             success: false,
-            message: 'Error al obtener los detalles de la orden'
+            message: 'Error al obtener la orden',
+            error: error.message
         });
     } finally {
         await connection.end();
     }
 });
+
