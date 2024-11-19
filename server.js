@@ -358,7 +358,6 @@ app.delete('/api/Productos/:id', async (req, res) => {
         });
     }
 });
-
 // Endpoint para crear una nueva orden
 app.post('/api/ordenes', authenticateToken, async (req, res) => {
     const connection = await createDbConnection();
@@ -461,25 +460,26 @@ app.put('/api/ordenes/:id/estado', async (req, res) => {
     }
 });
 
-// Ruta para crear una nueva orden
-app.post('/api/ordenes', async (req, res) => {
-    const { cliente, email, telefono, products, total_amount } = req.body;
-
+app.get('/api/ordenes', async (req, res) => {
     try {
         const connection = await mysql.createConnection(dbConfig);
-        const [result] = await connection.execute(
-            `INSERT INTO ordenes (cliente, email, telefono, products, total_amount) 
-             VALUES (?, ?, ?, ?, ?)`,
-            [cliente, email, telefono, products, total_amount]
-        );
+        const [ordenes] = await connection.execute(`
+            SELECT 
+                Id_Orden,
+                cliente,
+                email,
+                telefono,
+                products,
+                order_date,
+                total_amount,
+                estado
+            FROM ordenes
+            ORDER BY order_date DESC
+        `);
         await connection.end();
-
-        res.status(201).json({
-            message: 'Orden creada exitosamente',
-            Id_Orden: result.insertId
-        });
+        res.json(ordenes);
     } catch (error) {
-        console.error('Error al crear la orden:', error);
+        console.error('Error al obtener las órdenes:', error);
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
