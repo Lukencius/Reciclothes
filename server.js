@@ -9,8 +9,6 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = process.env.PORT || 3000;
 require('dotenv').config();
-const WebpayPlus = require('transbank-sdk').WebpayPlus;
-const Transaction = WebpayPlus.Transaction;
 
 // Configuración de la base de datos como constante
 const dbConfig = {
