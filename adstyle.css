@@ -3174,4 +3174,27 @@ input:checked + .slider:before {
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+.pagination-btn {
+    margin: 0 5px;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+}
+
+.pagination-btn.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.pagination-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.pagination-dots {
+    margin: 0 5px;
+}
     
