@@ -478,7 +478,7 @@
                     email: formData.get('email').trim(),
                     telefono: formData.get('telefono').trim(),
                     products: carrito.map(item => ({
-                        name: item.name,
+                        id: item.Id_Producto,
                         cantidad: item.cantidad
                     })),
                     order_date: new Date().toISOString(),
