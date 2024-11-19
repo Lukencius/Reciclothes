@@ -422,13 +422,12 @@ app.post('/api/ordenes', authenticateToken, async (req, res) => {
     }
 });
 
-// Endpoint para obtener todas las órdenes de un usuario
+// Endpoint para obtener todas las órdenes
 app.get('/api/ordenes', authenticateToken, async (req, res) => {
     const connection = await createDbConnection();
     try {
         const [rows] = await connection.execute(
-            'SELECT * FROM ordenes WHERE email = ? ORDER BY order_date DESC',
-            [req.user.email]
+            'SELECT * FROM ordenes ORDER BY order_date DESC'
         );
 
         // Parsear el JSON de productos para cada orden
