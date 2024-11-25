@@ -473,6 +473,7 @@ app.get('/api/ordenes', async (req, res) => {
                 products,
                 order_date,
                 total_amount,
+                imagen,
                 estado
             FROM ordenes
             ORDER BY order_date DESC
