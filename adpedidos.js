@@ -10,7 +10,6 @@ const ordersPerPage = 10;
 document.addEventListener('DOMContentLoaded', () => {
     verificarAdmin();
     loadOrders();
-    setupEventListeners();
 });
 
 // Verificar si es admin
@@ -77,6 +76,9 @@ function updateOrdersTable() {
                     </button>
                     <button onclick="printOrder(${order.Id_Orden})" class="action-btn print-btn">
                         <i class="fas fa-print"></i>
+                    </button>
+                    <button onclick="showPaymentProof('${order.imagen}')" class="action-btn proof-btn">
+                        <i class="fas fa-receipt"></i>
                     </button>
                 </td>
             `;
@@ -149,4 +151,38 @@ function showOrderDetails(orderId) {
 
 function printOrder(orderId) {
     // Implementa la lógica para imprimir una orden aquí
+}
+
+function showPaymentProof(imageUrl) {
+    if (imageUrl) {
+        Swal.fire({
+            imageUrl: imageUrl,
+            imageAlt: 'Comprobante de Pago',
+            width: '90%',
+            imageWidth: '100%',
+            confirmButtonText: 'Cerrar',
+            showCloseButton: true,
+            customClass: {
+                popup: 'swal-image-popup',
+                image: 'swal-image-custom'
+            },
+            didOpen: (popup) => {
+                // Agregar zoom con click
+                const img = popup.querySelector('.swal-image-custom');
+                if (img) {
+                    img.style.cursor = 'zoom-in';
+                    img.onclick = () => {
+                        window.open(imageUrl, '_blank');
+                    };
+                }
+            }
+        });
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se encontró el comprobante de pago',
+            confirmButtonText: 'Aceptar'
+        });
+    }
 }
