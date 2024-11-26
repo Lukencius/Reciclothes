@@ -71,12 +71,6 @@ function updateOrdersTable() {
                     </span>
                 </td>
                 <td>
-                    <button onclick="showOrderDetails(${order.Id_Orden})" class="action-btn view-btn">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button onclick="printOrder(${order.Id_Orden})" class="action-btn print-btn">
-                        <i class="fas fa-print"></i>
-                    </button>
                     <button onclick="showPaymentProof('${order.imagen}')" class="action-btn proof-btn">
                         <i class="fas fa-receipt"></i>
                     </button>
@@ -154,7 +148,7 @@ function printOrder(orderId) {
 }
 
 function showPaymentProof(imageUrl) {
-    if (imageUrl) {
+    if (imageUrl) { 
         Swal.fire({
             imageUrl: imageUrl,
             imageAlt: 'Comprobante de Pago',
