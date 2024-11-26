@@ -465,16 +465,7 @@ app.get('/api/ordenes', async (req, res) => {
     try {
         connection = await mysql.createConnection(dbConfig);
         const [ordenes] = await connection.execute(`
-            SELECT 
-                Id_Orden,
-                cliente, 
-                email,
-                telefono,
-                products,
-                order_date,
-                total_amount,
-                imagen,
-                estado
+            SELECT *
             FROM ordenes
             ORDER BY order_date DESC
         `);
