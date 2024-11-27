@@ -660,3 +660,107 @@ body{
         opacity: 0;
     }
 }
+
+/* 7. Estilos Adicionales */
+.impact-stats {
+    display: flex;
+    justify-content: space-around;
+    padding: 2rem 0;
+    background: rgba(28, 116, 48, 0.1);
+    border-radius: 10px;
+    margin: 2rem 0;
+    backdrop-filter: blur(5px);
+}
+
+.stat-item {
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-5px);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1c7430;
+    font-family: 'Montserrat', sans-serif;
+}
+
+
+/* 9. Animaciones de Carga */
+.loading-animation {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #1c7430;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Contenedor para el loader */
+.loader-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Versión oscura del loader */
+@media (prefers-color-scheme: dark) {
+    .loader-container {
+        background: rgba(0, 0, 0, 0.8);
+    }
+    
+    .loading-animation {
+        border: 5px solid #333;
+        border-top: 5px solid #1c7430;
+    }
+}
+
+/* Estilos para las notificaciones de SweetAlert */
+.swal2-popup {
+    font-family: 'Montserrat', sans-serif;
+    border-radius: 15px;
+}
+
+.swal2-title {
+    color: #1c7430 !important;
+    font-weight: 600;
+}
+
+.swal2-content {
+    color: #2c3e50 !important;
+}
+
+/* Estilos para modo oscuro */
+@media (prefers-color-scheme: dark) {
+    .swal2-popup {
+        background: #2d2d2d !important;
+    }
+    
+    .swal2-title {
+        color: #ffffff !important;
+    }
+    
+    .swal2-content {
+        color: #ffffff !important;
+    }
+    
+    .swal2-success-ring {
+        border-color: #1c7430 !important;
+    }
+}

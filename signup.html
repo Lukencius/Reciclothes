@@ -10,8 +10,13 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="auth-body">
+    <!-- Loader -->
+    <div class="loader-container">
+        <div class="loading-animation"></div>
+    </div>
     <div class="floating-elements">
         <!-- Hojas -->
         <div class="floating-item leaf" style="left: 10%; animation-delay: 0s;">
@@ -95,8 +100,18 @@
 
     <!-- script para conectar con el servidor -->
     <script>
+        // Funciones para mostrar/ocultar el loader
+        function showLoader() {
+            document.querySelector('.loader-container').style.display = 'flex';
+        }
+
+        function hideLoader() {
+            document.querySelector('.loader-container').style.display = 'none';
+        }
+
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            showLoader();
             
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
@@ -112,28 +127,46 @@
                 
                 const result = await response.json();
                 
-                const messageElement = document.getElementById('message');
-                messageElement.style.display = 'block';
-                
                 if (!response.ok) {
                     throw new Error(result.message || `HTTP error! status: ${response.status}`);
                 }
                 
-                messageElement.textContent = result.message;
-                if (result.success) {
-                    messageElement.className = 'alert alert-success';
-                    e.target.reset();
-                } else {
-                    messageElement.className = 'alert alert-danger';
-                }
+                // Mostrar notificación de éxito
+                await Swal.fire({
+                    icon: 'success',
+                    title: '¡Registro exitoso!',
+                    text: 'Tu cuenta ha sido creada correctamente',
+                    confirmButtonText: 'Continuar',
+                    confirmButtonColor: '#1c7430',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp'
+                    }
+                });
+
+                // Redirigir al login
+                window.location.href = 'login.html';
+                
             } catch (error) {
                 console.error('Error detallado:', error);
-                const messageElement = document.getElementById('message');
-                messageElement.textContent = 'Error: ' + error.message;
-                messageElement.className = 'alert alert-danger';
-                messageElement.style.display = 'block';
+                
+                // Mostrar notificación de error
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Ocurrió un error durante el registro',
+                    confirmButtonColor: '#1c7430'
+                });
+            } finally {
+                hideLoader();
             }
         });
+
+        
     </script>
 </body>
 </html>
