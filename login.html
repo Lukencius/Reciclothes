@@ -115,9 +115,12 @@
                 if (response.ok) {
                     // Guardar el token y datos del usuario
                     localStorage.setItem('userToken', result.token);
-                    localStorage.setItem('userData', JSON.stringify(result.user));
+                    localStorage.setItem('userData', JSON.stringify({
+                        email: data.email,
+                        name: result.user.name
+                    }));
 
-                    // Mostrar mensaje de bienvenida personalizado
+                    // Mostrar mensaje de bienvenida
                     await Swal.fire({
                         icon: 'success',
                         title: `¡Bienvenido/a ${result.user.name}!`,
@@ -135,18 +138,14 @@
                     });
 
                     // Redirigir según el tipo de usuario
-                    if (result.user.email === 'jimena@admin.com') {
-                        window.location.href = 'admin.html?token=' + result.token;
-                    } else {
-                        window.location.href = 'index.html';
-                    }
+                    window.location.href = 'index.html';
+                    
                 } else {
                     throw new Error(result.message || 'Error en las credenciales');
                 }
             } catch (error) {
                 console.error('Error:', error);
                 
-                // Mostrar notificación de error
                 Swal.fire({
                     icon: 'error',
                     title: 'Error de inicio de sesión',

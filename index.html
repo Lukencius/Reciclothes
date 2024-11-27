@@ -54,6 +54,11 @@
                     <a href="login.html" class="btn btn-success" id="loginButton">
                         <i class="bi bi-person"></i>
                     </a>
+                    <div id="adminButton" style="display: none;" class="ms-2">
+                        <a href="admin.html" class="btn btn-success">
+                            <i class="fas fa-user-shield"></i> Panel Admin
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -186,6 +191,23 @@
         }
         // Ejecutar cuando se carga la página
         window.addEventListener('load', actualizarBotonLogin);
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Verificar si hay un usuario logueado y obtener sus datos
+        const userData = localStorage.getItem('userData');
+        const adminButton = document.getElementById('adminButton');
+        
+        if (userData) {
+            const user = JSON.parse(userData);
+            console.log('Usuario actual:', user); // Para depuración
+            
+            if (user.email === 'jimena@admin.com') {
+                console.log('Es usuario admin'); // Para depuración
+                adminButton.style.display = 'block';
+            }
+        }
+    });
     </script>
 </body>
 </html>
