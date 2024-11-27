@@ -83,6 +83,13 @@
                                 <label for="password" class="form-label">Contraseña:</label>
                                 <input type="password" class="form-control" id="password" name="password" required>
                             </div>
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Confirmar Contraseña:</label>
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                                <div class="invalid-feedback">
+                                    Las contraseñas no coinciden
+                                </div>
+                            </div>
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-primary">Registrarse</button>
                                 <a href="login.html" class="btn btn-secondary">Ya tengo una cuenta</a>
@@ -111,9 +118,26 @@
 
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Verificar que las contraseñas coincidan
+            if (password !== confirmPassword) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de validación',
+                    text: 'Las contraseñas no coinciden',
+                    confirmButtonColor: '#1c7430'
+                });
+                return;
+            }
+            
             showLoader();
             
             const formData = new FormData(e.target);
+            // Eliminar confirmPassword antes de enviar al servidor
+            formData.delete('confirmPassword');
             const data = Object.fromEntries(formData.entries());
             
             try {
@@ -154,7 +178,6 @@
             } catch (error) {
                 console.error('Error detallado:', error);
                 
-                // Mostrar notificación de error
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
@@ -166,7 +189,29 @@
             }
         });
 
-        
+        // Validación en tiempo real
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (password !== confirmPassword) {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            } else {
+                this.classList.add('is-valid');
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        // Actualizar validación cuando cambie la contraseña principal
+        document.getElementById('password').addEventListener('input', function() {
+            const confirmPassword = document.getElementById('confirmPassword');
+            if (confirmPassword.value) {
+                const event = new Event('input');
+                confirmPassword.dispatchEvent(event);
+            }
+        });
+
     </script>
 </body>
 </html>
