@@ -1,6 +1,9 @@
+/* Importar fuentes de Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Montserrat:wght@500;600;700&display=swap');
+
 /* Estilos generales */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     line-height: 1.6;
     margin: 0;
     padding: 0;
@@ -447,3 +450,213 @@ body{
     color: #28a745;
 }
 
+/* Estilos para login.html */
+.login-body {
+    background-color: #f0f4f1;
+}
+
+.login-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-card .card-title {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.login-card .form-label {
+    color: #333;
+}
+
+.login-card .btn-primary {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.login-card .btn-primary:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.login-card .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.login-card .btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+/* Estilos para signup.html */
+.signup-body {
+    background-color: #e9f5e9;
+}
+
+.signup-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.signup-card .card-title {
+    color: #5cb85c;
+    font-weight: bold;
+}
+
+.signup-card .form-label {
+    color: #333;
+}
+
+.signup-card .btn-primary {
+    background-color: #5cb85c;
+    border-color: #5cb85c;
+}
+
+.signup-card .btn-primary:hover {
+    background-color: #449d44;
+    border-color: #419641;
+}
+
+.signup-card .btn-secondary {
+    background-color: #f0ad4e;
+    border-color: #f0ad4e;
+}
+
+.signup-card .btn-secondary:hover {
+    background-color: #ec971f;
+    border-color: #eb9316;
+}
+
+/* Estilos compartidos para login.html y signup.html */
+.auth-body {
+    background-color: #e0f0e5;
+}
+
+.auth-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}
+
+.auth-card .card-title {
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #1c7430;
+    font-weight: 600;
+    font-size: 1.75rem;
+    letter-spacing: -0.5px;
+}
+
+.auth-card .form-label {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.auth-card .form-control {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+}
+
+.auth-card .btn {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.auth-card .btn-primary {
+    background-color: #1c7430;
+    border-color: #1c7430;
+}
+
+.auth-card .btn-primary:hover {
+    background-color: #155724;
+    border-color: #155724;
+}
+
+.auth-card .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.auth-card .btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.recycle-logo {
+    width: 100px;
+    height: auto;
+    margin-bottom: 1.5rem;
+}
+
+/* Transiciones suaves para botones */
+.auth-card .btn {
+    transition: all 0.3s ease;
+}
+
+/* Mejorar el feedback visual en campos de formulario */
+.auth-card .form-control:focus {
+    border-color: #1c7430;
+    box-shadow: 0 0 0 0.2rem rgba(28, 116, 48, 0.25);
+}
+
+/* Efecto sutil en la tarjeta */
+.auth-card {
+    transition: transform 0.3s ease;
+}
+
+.auth-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Estilos para los elementos flotantes */
+.floating-elements {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.floating-item {
+    position: absolute;
+    opacity: 0.2;
+    animation: float 15s linear infinite;
+    font-size: 24px;
+    color: #1c7430;
+}
+
+.floating-item.leaf {
+    color: #2d8a3e;
+}
+
+.floating-item.recycle {
+    color: #156c2c;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.2;
+    }
+    90% {
+        opacity: 0.2;
+    }
+    100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+    }
+}
