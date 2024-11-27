@@ -82,6 +82,11 @@
                             <div class="mb-3">
                                 <label for="password" class="form-label">Contraseña:</label>
                                 <input type="password" class="form-control" id="password" name="password" required>
+                                <div class="password-requirements mt-2" id="passwordRequirements"></div>
+                                <small class="text-muted">
+                                    La contraseña debe contener al menos 8 caracteres, incluyendo mayúsculas, 
+                                    minúsculas, números y caracteres especiales.
+                                </small>
                             </div>
                             <div class="mb-3">
                                 <label for="confirmPassword" class="form-label">Confirmar Contraseña:</label>
@@ -116,11 +121,89 @@
             document.querySelector('.loader-container').style.display = 'none';
         }
 
+        // Agregar estas funciones de validación
+        function validatePassword(password) {
+            const minLength = 8;
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumbers = /\d/.test(password);
+            const hasSpecialChar = /[!@#$-_%^&*(),.?":{}|<>]/.test(password);
+
+            const errors = [];
+            
+            if (password.length < minLength) {
+                errors.push(`Mínimo ${minLength} caracteres`);
+            }
+            if (!hasUpperCase) {
+                errors.push('Una mayúscula');
+            }
+            if (!hasLowerCase) {
+                errors.push('Una minúscula');
+            }
+            if (!hasNumbers) {
+                errors.push('Un número');
+            }
+            if (!hasSpecialChar) {
+                errors.push('Un carácter especial');
+            }
+
+            return {
+                isValid: errors.length === 0,
+                errors: errors
+            };
+        }
+
+        // Actualizar el evento input del campo password
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const validation = validatePassword(password);
+            const requirementsList = document.getElementById('passwordRequirements');
+            
+            // Actualizar el estado visual del campo
+            if (validation.isValid) {
+                this.classList.add('is-valid');
+                this.classList.remove('is-invalid');
+                requirementsList.style.display = 'none';
+            } else {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+                requirementsList.style.display = 'block';
+                
+                // Actualizar la lista de requisitos
+                requirementsList.innerHTML = validation.errors.map(error => 
+                    `<li class="requirement-item">
+                        <i class="fas fa-times-circle text-danger"></i> ${error}
+                    </li>`
+                ).join('');
+            }
+            
+            // Actualizar validación de confirmación si existe
+            const confirmPassword = document.getElementById('confirmPassword');
+            if (confirmPassword.value) {
+                const event = new Event('input');
+                confirmPassword.dispatchEvent(event);
+            }
+        });
+
+        // Actualizar el evento submit del formulario
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validar requisitos de contraseña
+            const validation = validatePassword(password);
+            if (!validation.isValid) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Contraseña no válida',
+                    html: `La contraseña debe tener:<br>${validation.errors.map(error => 
+                        `• ${error}<br>`).join('')}`,
+                    confirmButtonColor: '#1c7430'
+                });
+                return;
+            }
             
             // Verificar que las contraseñas coincidan
             if (password !== confirmPassword) {
@@ -136,7 +219,6 @@
             showLoader();
             
             const formData = new FormData(e.target);
-            // Eliminar confirmPassword antes de enviar al servidor
             formData.delete('confirmPassword');
             const data = Object.fromEntries(formData.entries());
             
@@ -152,10 +234,14 @@
                 const result = await response.json();
                 
                 if (!response.ok) {
+                    // Verificar si el error es por correo duplicado
+                    if (result.message && result.message.includes('duplicate')) {
+                        throw new Error('Este correo electrónico ya ha sido registrado');
+                    }
                     throw new Error(result.message || `HTTP error! status: ${response.status}`);
                 }
                 
-                // Mostrar notificación de éxito
+                // Mostrar notificación de éxito y redireccionar
                 await Swal.fire({
                     icon: 'success',
                     title: '¡Registro exitoso!',
@@ -172,18 +258,28 @@
                     }
                 });
 
-                // Redirigir al login
                 window.location.href = 'login.html';
                 
             } catch (error) {
                 console.error('Error detallado:', error);
                 
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.message || 'Ocurrió un error durante el registro',
-                    confirmButtonColor: '#1c7430'
-                });
+                // Personalizar el mensaje de error
+                if (error.message.includes('ya ha sido registrado')) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Usuario ya existente',
+                        text: 'Este correo electrónico ya ha sido registrado',
+                        confirmButtonColor: '#1c7430',
+                        footer: '<a href="login.html">¿Deseas iniciar sesión?</a>'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.message || 'Ocurrió un error durante el registro',
+                        confirmButtonColor: '#1c7430'
+                    });
+                }
             } finally {
                 hideLoader();
             }
