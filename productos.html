@@ -55,8 +55,11 @@
                     </form>
                 </div>
                 <div class="col-auto ms-auto">
-                    <a href="carrito.html" class="btn btn-success me-2">
+                    <a href="carrito.html" class="btn btn-success me-2 position-relative">
                         <i class="bi bi-cart"></i>
+                        <span id="cartCounter" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            0
+                        </span>
                     </a>
                     <a href="login.html" class="btn btn-success" id="loginButton">
                         <i class="bi bi-person"></i>
@@ -170,6 +173,47 @@
             }
             // Ejecutar cuando se carga la página
             actualizarBotonLogin();
+        });
+
+        // Función para agregar al carrito
+        function agregarAlCarrito(productoId) {
+            const productoString = localStorage.getItem('productoSeleccionado');
+            if (productoString) {
+                const producto = JSON.parse(productoString);
+                const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+                carrito.push(producto);
+                localStorage.setItem('carrito', JSON.stringify(carrito));
+                
+                
+                // Opcional: Mostrar mensaje de confirmación
+                alert('Producto agregado al carrito');
+                // Actualizar el contador inmediatamente después de agregar
+                actualizarContadorCarrito();
+            }
+        }
+
+        // Función para actualizar el contador del carrito
+        function actualizarContadorCarrito() {
+            const cartItems = JSON.parse(localStorage.getItem('carrito')) || [];
+            const contador = document.getElementById('cartCounter');
+            contador.textContent = cartItems.length;
+            
+            // Ocultar el contador si no hay items
+            if (cartItems.length === 0) {
+                contador.style.display = 'none';
+            } else {
+                contador.style.display = 'block';
+            }
+        }
+
+        // Ejecutar cuando se carga la página
+        window.addEventListener('load', actualizarContadorCarrito);
+        
+        // Actualizar el contador cada vez que el carrito cambie
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'carrito') {
+                actualizarContadorCarrito();
+            }
         });
     </script>
 </body>
