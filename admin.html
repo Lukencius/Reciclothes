@@ -21,17 +21,139 @@
             </div>
             <div class="sidebar-menu">
                 <ul>
-                    <li><a href="admin.html" class="active"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
-                    <li><a href="adproductos.html"><i class="fas fa-tshirt"></i> <span>Productos</span></a></li>
-                    <li><a href="adventas.html"><i class="fas fa-dollar-sign"></i> <span>Ventas</span></a></li>
-                    <li><a href="adpedidos.html"><i class="fas fa-shopping-cart"></i> <span>Pedidos</span></a></li>
-                    <li><a href="adtienda.html"><i class="fas fa-store"></i> <span>Tienda</span></a></li>
-                    <li><a href="adclientes.html"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
+                    <li><a href="admin.html" id="dashboardLink"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+                    <li><a href="adproductos.html" id="productosLink"><i class="fas fa-tshirt"></i> <span>Productos</span></a></li>
+                    <li><a href="adventas.html" id="ventasLink"><i class="fas fa-dollar-sign"></i> <span>Ventas</span></a></li>
+                    <li><a href="adpedidos.html" id="pedidosLink"><i class="fas fa-shopping-cart"></i> <span>Pedidos</span></a></li>
+                    <li><a href="adtienda.html" id="tiendaLink"><i class="fas fa-store"></i> <span>Tienda</span></a></li>
+                    <li><a href="adclientes.html" id="clientesLink"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
                 </ul>
             </div>
             <div class="sidebar-footer">
                 <ul>
-                    <li><a href="adajustes.html"><i class="fas fa-cog"></i> <span>Ajustes</span></a></li>
+                    <li><a href="adajustes.html" id="ajustesLink"><i class="fas fa-cog"></i> <span>Ajustes</span></a></li>
+                    <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> <span>Cerrar sesión</span></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <!-- Aquí va el contenido específico de cada página -->
+        </main>
+    </div>
+
+    <div id="error-message" class="alert alert-danger" style="display: none;">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png" alt="Acceso denegado">
+        <h1>Acceso no autorizado</h1>
+        <p>No tienes permiso para ver esta página.</p>
+    </div>
+
+    <script>
+        // Función para actualizar los enlaces con el token actual
+        function actualizarEnlacesAdmin() {
+            // Obtener el token de la URL actual o del localStorage
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token') || localStorage.getItem('adminToken');
+            
+            if (!token) return;
+
+            // Lista de todos los IDs de enlaces admin
+            const adminLinks = [
+                'dashboardLink',
+                'productosLink',
+                'ventasLink',
+                'pedidosLink',
+                'tiendaLink',
+                'clientesLink',
+                'ajustesLink'
+            ];
+            
+            // Actualizar cada enlace con el token
+            adminLinks.forEach(linkId => {
+                const link = document.getElementById(linkId);
+                if (link) {
+                    const baseHref = link.getAttribute('href').split('?')[0];
+                    link.href = `${baseHref}?token=${token}`;
+                }
+            });
+            
+            // Manejar el logout
+            const logoutBtn = document.getElementById('logout');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    localStorage.removeItem('adminToken');
+                    localStorage.removeItem('userData');
+                    window.location.href = 'index.html';
+                });
+            }
+        }
+
+        // Verificar acceso y actualizar enlaces al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar acceso
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenUrl = urlParams.get('token');
+            const tokenAlmacenado = localStorage.getItem('adminToken');
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            
+            // Verificar si es Jimena Arriagada
+            if (userData.name !== 'Jimena Arriagada') {
+                alert('No tienes autorización para acceder a esta página');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Manejar los tokens
+            if (tokenUrl) {
+                // Si hay token en la URL, actualizarlo en localStorage
+                localStorage.setItem('adminToken', tokenUrl);
+            } else if (tokenAlmacenado) {
+                // Si no hay token en la URL pero hay uno almacenado, redirigir con el token
+                window.location.href = window.location.pathname + '?token=' + tokenAlmacenado;
+                return;
+            } else {
+                // Si no hay token ni en URL ni en localStorage, redirigir al inicio
+                alert('Sesión no válida');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Actualizar enlaces
+            actualizarEnlacesAdmin();
+            
+            // Marcar el enlace activo según la página actual
+            const currentPage = window.location.pathname.split('/').pop();
+            const activeLink = document.querySelector(`a[href^="${currentPage}"]`);
+            if (activeLink) {
+                // Remover clase active de todos los enlaces
+                document.querySelectorAll('.sidebar-menu a').forEach(link => link.classList.remove('active'));
+                // Agregar clase active al enlace actual
+                activeLink.classList.add('active');
+            }
+        });
+    </script>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">
+                <div class="logo-img">
+                    <img src="media\ReciClothes_sinf.png" alt="ReciCLothes Logo" class="logo-img">
+                    <h2>ReciClothes</h2>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li><a href="admin.html" id="dashboardLink"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+                    <li><a href="adproductos.html" id="productosLink"><i class="fas fa-tshirt"></i> <span>Productos</span></a></li>
+                    <li><a href="adventas.html" id="ventasLink"><i class="fas fa-dollar-sign"></i> <span>Ventas</span></a></li>
+                    <li><a href="adpedidos.html" id="pedidosLink"><i class="fas fa-shopping-cart"></i> <span>Pedidos</span></a></li>
+                    <li><a href="adtienda.html" id="tiendaLink"><i class="fas fa-store"></i> <span>Tienda</span></a></li>
+                    <li><a href="adclientes.html" id="clientesLink"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <ul>
+                    <li><a href="adajustes.html" id="ajustesLink"><i class="fas fa-cog"></i> <span>Ajustes</span></a></li>
                     <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> <span>Cerrar sesión</span></a></li>
                 </ul>
             </div>
@@ -171,7 +293,7 @@
     </div>
 
     <script src="admin.js"></script>
-    <script>
+    <!-- <script>
         function verifyAdminToken() {
             const urlParams = new URLSearchParams(window.location.search);
             const tokenFromUrl = urlParams.get('token');
@@ -189,6 +311,6 @@
         }
 
         window.onload = verifyAdminToken;
-    </script>
+    </script> -->
 </body>
 </html>

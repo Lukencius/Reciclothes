@@ -10,6 +10,28 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+    <script>
+        // Función para verificar el token de admin
+        function verificarTokenAdmin() {
+            // Obtener el token de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenUrl = urlParams.get('token');
+            // Obtener el token almacenado
+            const tokenAlmacenado = localStorage.getItem('adminToken');
+            // Obtener datos del usuario
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            
+            // Verificar si el usuario es Jimena Arriagada y si los tokens coinciden
+            if (userData.name !== 'Jimena Arriagada' || !tokenUrl || !tokenAlmacenado || tokenUrl !== tokenAlmacenado) {
+                // Si no cumple las condiciones, redirigir a la página principal
+                alert('No tienes autorización para acceder a esta página');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Ejecutar la verificación al cargar la página
+        verificarTokenAdmin();
+    </script>
     <div class="container">
         <nav class="sidebar">
             <div class="logo">
@@ -20,21 +42,88 @@
             </div>
             <div class="sidebar-menu">
                 <ul>
-                    <li><a href="admin.html" ><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
-                    <li><a href="adproductos.html"><i class="fas fa-tshirt"></i> <span>Productos</span></a></li>
-                    <li><a href="adventas.html" ><i class="fas fa-dollar-sign"></i> <span>Ventas</span></a></li>
-                    <li><a href="adpedidos.html"><i class="fas fa-shopping-cart"></i> <span>Pedidos</span></a></li>
-                    <li><a href="adtienda.html"><i class="fas fa-store"></i> <span>Tienda</span></a></li>
-                    <li><a href="adclientes.html"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
+                    <li><a href="admin.html" id="dashboardLink"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+                    <li><a href="adproductos.html" id="productosLink"><i class="fas fa-tshirt"></i> <span>Productos</span></a></li>
+                    <li><a href="adventas.html" id="ventasLink"><i class="fas fa-dollar-sign"></i> <span>Ventas</span></a></li>
+                    <li><a href="adpedidos.html" id="pedidosLink"><i class="fas fa-shopping-cart"></i> <span>Pedidos</span></a></li>
+                    <li><a href="adtienda.html" id="tiendaLink"><i class="fas fa-store"></i> <span>Tienda</span></a></li>
+                    <li><a href="adclientes.html" id="clientesLink"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
                 </ul>
             </div>
             <div class="sidebar-footer">
                 <ul>
-                    <li><a href="adajustes.html" class="active" ><i class="fas fa-cog"></i> <span>Ajustes</span></a></li>
+                    <li><a href="adajustes.html" id="ajustesLink"><i class="fas fa-cog"></i> <span>Ajustes</span></a></li>
                     <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> <span>Cerrar sesión</span></a></li>
                 </ul>
             </div>
         </nav>
+
+        <script>
+            // Función para actualizar los enlaces con el token actual
+            function actualizarEnlacesAdmin() {
+                // Obtener el token de la URL actual
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
+                
+                // Lista de todos los IDs de enlaces admin
+                const adminLinks = [
+                    'dashboardLink',
+                    'productosLink',
+                    'ventasLink',
+                    'pedidosLink',
+                    'tiendaLink',
+                    'clientesLink',
+                    'ajustesLink'
+                ];
+                
+                // Actualizar cada enlace con el token
+                adminLinks.forEach(linkId => {
+                    const link = document.getElementById(linkId);
+                    if (link) {
+                        const baseHref = link.getAttribute('href').split('?')[0];
+                        link.href = `${baseHref}?token=${token}`;
+                    }
+                });
+                
+                // Manejar el logout
+                const logoutBtn = document.getElementById('logout');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        localStorage.removeItem('adminToken');
+                        localStorage.removeItem('userData');
+                        window.location.href = 'index.html';
+                    });
+                }
+            }
+
+            // Verificar acceso y actualizar enlaces al cargar la página
+            document.addEventListener('DOMContentLoaded', function() {
+                // Verificar acceso
+                const urlParams = new URLSearchParams(window.location.search);
+                const tokenUrl = urlParams.get('token');
+                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                
+                if (userData.name !== 'Jimena Arriagada' || !tokenUrl) {
+                    alert('No tienes autorización para acceder a esta página');
+                    window.location.href = 'index.html';
+                    return;
+                }
+                
+                // Actualizar enlaces
+                actualizarEnlacesAdmin();
+                
+                // Marcar el enlace activo según la página actual
+                const currentPage = window.location.pathname.split('/').pop();
+                const activeLink = document.querySelector(`a[href^="${currentPage}"]`);
+                if (activeLink) {
+                    // Remover clase active de todos los enlaces
+                    document.querySelectorAll('.sidebar-menu a').forEach(link => link.classList.remove('active'));
+                    // Agregar clase active al enlace actual
+                    activeLink.classList.add('active');
+                }
+            });
+        </script>
 
         <main class="main-content">
             <div class="settings-header">
