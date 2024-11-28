@@ -9,6 +9,8 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = process.env.PORT || 3000;
 require('dotenv').config();
+const WebpayPlus = require('transbank-sdk').WebpayPlus;
+const Transaction = WebpayPlus.Transaction;
 
 // Configuración de la base de datos como constante
 const dbConfig = {
@@ -154,33 +156,6 @@ const checkTable = async (tableName, createTableSQL = null) => {
     }
 };
 
-// Crear tablas de órdenes si no existen
-const createOrderTables = async () => {
-    const connection = await createDbConnection();
-    try {
-        // Crear tabla de órdenes según la estructura mostrada
-        await connection.execute(`
-            CREATE TABLE IF NOT EXISTS ordenes (
-                Id_Orden INT AUTO_INCREMENT PRIMARY KEY,
-                cliente VARCHAR(255) NOT NULL,
-                email VARCHAR(255) NOT NULL,
-                telefono VARCHAR(20) NOT NULL,
-                products TEXT NOT NULL,
-                order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                total_amount DECIMAL(10,2) NOT NULL,
-                estado VARCHAR(50) DEFAULT 'Pendiente'
-            )
-        `);
-
-        console.log('Tabla de órdenes creada exitosamente');
-    } catch (error) {
-        console.error('Error al crear tabla de órdenes:', error);
-        throw error;
-    } finally {
-        await connection.end();
-    }
-};
-
 // Inicialización de la base de datos
 const initDatabase = async () => {
     await createDbConnection()
@@ -188,8 +163,18 @@ const initDatabase = async () => {
         .catch(error => console.error('Error al conectar a la base de datos:', error));
 
     await checkTable('clientes');
-    await checkTable('Productos');
-    await createOrderTables();
+    await checkTable('Productos', `
+        CREATE TABLE IF NOT EXISTS Productos (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            description TEXT,
+            category VARCHAR(50),
+            price DECIMAL(10,2) NOT NULL,
+            stock INT DEFAULT 0,
+            imagen VARCHAR(500),  // Cambiado de BLOB a VARCHAR para almacenar URLs
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
 };
 
 initDatabase();
@@ -358,128 +343,87 @@ app.delete('/api/Productos/:id', async (req, res) => {
         });
     }
 });
-// Endpoint para crear una nueva orden
-app.post('/api/ordenes', authenticateToken, async (req, res) => {
-    const connection = await createDbConnection();
+
+// Configurar Webpay
+WebpayPlus.configureForTesting();
+
+// Agregar la ruta para crear transacción
+app.post('/crear-transaccion', async (req, res) => {
     try {
-        const { cliente, email, telefono, products, total_amount } = req.body;
-
-        // Validar datos requeridos
-        if (!cliente || !email || !telefono || !products || !total_amount) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Faltan datos requeridos para la orden' 
-            });
-        }
-
-        // Convertir el array de productos a JSON string
-        const productsJSON = JSON.stringify(products);
-
-        // Insertar la orden
-        const [result] = await connection.execute(
-            `INSERT INTO ordenes (
-                cliente, 
-                email, 
-                telefono, 
-                products, 
-                total_amount, 
-                estado
-            ) VALUES (?, ?, ?, ?, ?, ?)`,
-            [
-                cliente, 
-                email, 
-                telefono, 
-                productsJSON, 
-                total_amount, 
-                'Pendiente'
-            ]
+        const { total, email } = req.body;
+        
+        const createResponse = await Transaction.create(
+            'orden_' + Date.now(),
+            'sesion_' + Date.now(),
+            total,
+            'https://reci-clothes.vercel.app/confirmar-pago'
         );
-
-        // Actualizar el stock de los productos
-        for (const product of products) {
-            await connection.execute(
-                'UPDATE Productos SET stock = stock - ? WHERE Id_Producto = ?',
-                [product.cantidad, product.id]
-            );
-        }
 
         res.json({
-            success: true,
-            message: 'Orden creada exitosamente',
-            Id_Orden: result.insertId
+            url: createResponse.url,
+            token: createResponse.token
         });
-
     } catch (error) {
-        console.error('Error al crear la orden:', error);
+        console.error('Error al crear transacción:', error);
+        res.status(500).json({ error: 'Error al procesar el pago' });
+    }
+});
+
+// Ruta para confirmar la transacción
+app.post('/confirmar-transaccion', async (req, res) => {
+    try {
+        const { token_ws } = req.body;
+        
+        // Confirmar la transacción con Webpay
+        const confirmResponse = await Transaction.commit(token_ws);
+        
+        // Verificar el estado de la transacción
+        if (confirmResponse.status === 'AUTHORIZED') {
+            res.json({
+                success: true,
+                ordenId: confirmResponse.buy_order,
+                amount: confirmResponse.amount,
+                message: 'Pago procesado correctamente'
+            });
+        } else {
+            res.json({
+                success: false,
+                message: 'La transacción no fue autorizada'
+            });
+        }
+    } catch (error) {
+        console.error('Error al confirmar transacción:', error);
         res.status(500).json({
             success: false,
-            message: 'Error al procesar la orden',
-            error: error.message
+            message: 'Error al procesar la confirmación del pago'
         });
-    } finally {
-        await connection.end();
     }
+    
 });
 
-// Ruta para obtener una orden específica
-app.get('/api/ordenes/:id', async (req, res) => {
+router.get('/api/ordenes/:userId', authenticateToken, async (req, res) => {
     try {
-        const connection = await mysql.createConnection(dbConfig);
-        const [orden] = await connection.execute(
-            'SELECT * FROM ordenes WHERE Id_Orden = ?',
-            [req.params.id]
-        );
-        await connection.end();
+        const { userId } = req.params;
+        const query = `
+            SELECT 
+                o.id_orden, 
+                o.fecha_orden, 
+                p.nombre_producto, 
+                od.cantidad,
+                od.cantidad * od.precio_unitario as total,
+                o.estado
+            FROM ordenes o
+            JOIN orden_detalles od ON o.id_orden = od.id_orden
+            JOIN productos p ON od.id_producto = p.id_producto
+            WHERE o.id_usuario = $1
+            ORDER BY o.fecha_orden DESC
+        `;
         
-        if (orden.length === 0) {
-            return res.status(404).json({ error: 'Orden no encontrada' });
-        }
-        res.json(orden[0]);
+        const result = await pool.query(query, [userId]);
+        res.json(result.rows);
     } catch (error) {
-        console.error('Error al obtener la orden:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        console.error(error);
+        res.status(500).json({ error: 'Error al obtener los pedidos' });
     }
-});
+}); 
 
-// Ruta para actualizar el estado de una orden
-app.put('/api/ordenes/:id/estado', async (req, res) => {
-    const { estado } = req.body;
-    const { id } = req.params;
-
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        await connection.execute(
-            'UPDATE ordenes SET estado = ? WHERE Id_Orden = ?',
-            [estado, id]
-        );
-        await connection.end();
-        res.json({ message: 'Estado actualizado correctamente' });
-    } catch (error) {
-        console.error('Error al actualizar el estado:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
-    }
-});
-
-app.get('/api/ordenes', async (req, res) => {
-    let connection;
-    try {
-        connection = await mysql.createConnection(dbConfig);
-        const [ordenes] = await connection.execute(`
-            SELECT *
-            FROM ordenes
-            ORDER BY order_date DESC
-        `);
-        res.json(ordenes);
-    } catch (error) {
-        console.error('Error al obtener las órdenes:', error);
-        res.status(500).json({ 
-            success: false,
-            mensaje: 'Error al obtener las órdenes',
-            error: error.message 
-        });
-    } finally {
-        if (connection) {
-            await connection.end();
-        }
-    }
-});

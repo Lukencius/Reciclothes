@@ -172,16 +172,6 @@
 
     <script src="admin.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const userData = JSON.parse(localStorage.getItem('userData'));
-            
-            if (!userData || userData.email !== 'jimena@admin.com') {
-                // Si no es el admin, redirigir a index
-                window.location.href = 'index.html';
-                return;
-            }
-        });
-
         function verifyAdminToken() {
             const urlParams = new URLSearchParams(window.location.search);
             const tokenFromUrl = urlParams.get('token');

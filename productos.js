@@ -1,140 +1,126 @@
-// Configuración de la API
-const API_URL = 'https://reciclothes.onrender.com/api';
-
-// Al cargar la página, decidir qué vista mostrar
-document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('id');
-    
-    if (productId) {
-        loadProductDetail(productId);
-    } else {
-        loadProducts();
-    }
+// Esperar a que el DOM esté completamente cargado antes de inicializar
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM cargado, iniciando carga de productos');
+    cargarProductos();
 });
 
-// Cargar lista de productos
-async function loadProducts() {
+/**
+ * Función principal para cargar y mostrar los productos
+ * Realiza la petición a la API y renderiza los productos en el DOM
+ */
+async function cargarProductos() {
     try {
-        const response = await fetch(`${API_URL}/productos`);
-        const products = await response.json();
-        renderProductsList(products);
-    } catch (error) {
-        console.error('Error al cargar productos:', error);
-        showError('No se pudieron cargar los productos');
-    }
-}
+        // Obtener el contenedor principal de productos
+        const productosContainer = document.getElementById('productosContainer');
+        if (!productosContainer) {
+            throw new Error('No se encontró el elemento productosContainer');
+        }
+        
+        // Obtener la categoría de la página actual
+        const categoria = productosContainer.dataset.category;
+        
+        // Realizar petición a la API
+        const response = await fetch('https://reciclothes.onrender.com/api/productos');
+        const productos = await response.json();
+        
+        // Filtrar productos si hay una categoría específica
+        const productosFiltrados = categoria 
+            ? productos.filter(producto => producto.category === categoria)
+            : productos;
+        
+        // Limpiar el contenedor antes de agregar nuevos productos
+        productosContainer.innerHTML = ''; 
+        
+        // Generar el HTML para todos los productos usando template literals
+        const productosHTML = productosFiltrados.map(producto => {
+            // Usar imagen por defecto si no hay URL de imagen
+            const imgSrc = producto.imagen || 'media/polera.png';
+            
+            return `
+                <div class="col-md-4 mb-4">
+                    <div class="card product-card" style="cursor: pointer;" onclick="verDetalleProducto(${JSON.stringify(producto).replace(/"/g, '&quot;')})">
+                        <img src="${imgSrc}" class="card-img-top product-card-img" alt="${producto.name}" onerror="this.src='media/polera.png'">
+                        <div class="card-body">
+                            <h5 class="card-title">${producto.name}</h5>
+                            <p class="card-text">${producto.description}</p>
+                            <p class="card-text"><strong>Precio: $${producto.price.toLocaleString('es-CL')}</strong></p>
+                            <p class="card-text">Categoría: ${producto.category}</p>
+                            <p class="card-text">Stock: ${producto.stock}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join(''); // Unir todos los elementos en una sola cadena HTML
+        // Insertar todos los productos en el DOM de una sola vez
+        productosContainer.innerHTML = productosHTML;
 
-// Renderizar lista de productos
-function renderProductsList(products) {
-    const container = document.getElementById('productosContainer');
-    
-    if (!products.length) {
-        container.innerHTML = `
-            <div class="col-12 text-center">
-                <p class="no-products">No hay productos disponibles</p>
+        // Prevenir que el clic en el botón propague al contenedor
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        });
+
+    } catch (error) {
+        // Manejo de errores centralizado
+        console.error('Error al cargar productos:', error);
+        const errorHTML = `
+            <div class="col-12">
+                <div class="alert alert-danger" role="alert">
+                    Error al cargar los productos. Por favor, intente más tarde.
+                </div>
             </div>
         `;
-        return;
+        // Mostrar mensaje de error al usuario
+        if (productosContainer) productosContainer.innerHTML = errorHTML;
     }
-
-    const productsHTML = products.map(product => `
-        <div class="col-12 col-sm-6 col-lg-4 mb-4">
-            <div class="product-card" onclick="navigateToProduct(event, ${product.id})">
-                <div class="product-image-container">
-                    <img 
-                        src="${product.imagen || 'media/placeholder.png'}" 
-                        alt="${product.name}"
-                        class="product-image"
-                        loading="lazy"
-                    >
-                    <div class="product-badges">
-                        ${product.categoria === 'eco' ? 
-                            '<span class="badge badge-eco">ECO</span>' : ''}
-                        ${product.descuento ? 
-                            `<span class="badge badge-discount">-${product.descuento}%</span>` : ''}
-                    </div>
-                </div>
-                <div class="product-info">
-                    <h3 class="product-title">${product.name}</h3>
-                    <div class="product-price">
-                        ${product.descuento ? 
-                            `<span class="original-price">$${product.precio_original}</span>` : ''}
-                        <span class="current-price">$${product.price}</span>
-                    </div>
-                    <p class="product-description">${product.description || 'Sin descripción disponible'}</p>
-                    <div class="product-stock">
-                        Stock: <span class="${product.stock > 0 ? 'in-stock' : 'out-stock'}">
-                            ${product.stock > 0 ? `${product.stock} disponibles` : 'Agotado'}
-                        </span>
-                    </div>
-                    <div class="product-actions" onclick="event.stopPropagation()">
-                        ${product.stock > 0 ? `
-                            <button 
-                                class="btn-add-cart"
-                                onclick="addToCart(${product.id})"
-                            >
-                                <i class="fas fa-shopping-cart"></i>
-                                Añadir al carrito
-                            </button>
-                        ` : `
-                            <button class="btn-notify" onclick="notifyAvailability(${product.id})">
-                                <i class="fas fa-bell"></i>
-                                Notificarme
-                            </button>
-                        `}
-                        <button 
-                            class="btn-favorite ${product.isFavorite ? 'active' : ''}"
-                            onclick="toggleFavorite(${product.id})"
-                        >
-                            <i class="fas fa-heart"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `).join('');
-
-    container.innerHTML = productsHTML;
 }
 
-// Cargar detalle de producto
-async function loadProductDetail(productId) {
+async function agregarAlCarrito(productoId) {
     try {
-        const response = await fetch(`${API_URL}/productos/${productId}`);
-        if (!response.ok) {
+        // Obtener los datos del producto desde el servidor
+        const response = await fetch(`https://reciclothes.onrender.com/api/productos/${productoId}`);
+        const producto = await response.json();
+        
+        if (!producto) {
             throw new Error('Producto no encontrado');
         }
-        const product = await response.json();
-        renderProductDetail(product);
+
+        // Obtener carrito actual o iniciar uno nuevo
+        let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        
+        // Buscar si el producto ya existe
+        let productoEnCarrito = carrito.find(item => item.Id_Producto === parseInt(productoId));
+        
+        if (productoEnCarrito) {
+            // Si existe, solo aumentar cantidad
+            productoEnCarrito.cantidad += 1;
+        } else {
+            // Si no existe, agregar nuevo producto
+            carrito.push({
+                Id_Producto: parseInt(productoId),
+                name: producto.name,
+                price: producto.price,
+                imagen: producto.imagen,
+                cantidad: 1
+            });
+        }
+        
+        // Guardar carrito actualizado
+        localStorage.setItem('carrito', JSON.stringify(carrito));
+        
+        // Notificar al usuario
+        alert('Producto agregado al carrito');
+        
     } catch (error) {
-        console.error('Error al cargar el detalle del producto:', error);
-        showError('No se pudo cargar el detalle del producto');
+        console.error('Error:', error);
+        alert('Error al agregar el producto al carrito');
     }
 }
 
-// Función para navegar al detalle
-function navigateToProduct(event, productId) {
-    if (event.target.closest('.product-actions')) {
-        return;
-    }
-    window.location.href = `productos.html?id=${productId}`;
-}
-
-// Mostrar errores
-function showError(message) {
-    const container = document.getElementById('productosContainer');
-    container.innerHTML = `
-        <div class="col-12 text-center">
-            <div class="alert alert-danger" role="alert">
-                ${message}
-            </div>
-        </div>
-    `;
-}
-
-// Función para mostrar notificaciones
-function showNotification(message, type = 'info') {
-    // Implementa tu sistema de notificaciones aquí
-    alert(message); // Temporal, reemplazar con un sistema de notificaciones mejor
+function verDetalleProducto(producto) {
+    // Guardar el producto en localStorage para recuperarlo en la página de detalle
+    localStorage.setItem('productoSeleccionado', JSON.stringify(producto));
+    // Redirigir a la página de productos
+    window.location.href = 'productos.html';
 }
