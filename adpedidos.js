@@ -75,7 +75,7 @@ function updateOrdersTable() {
                     <button onclick="showOrderDetails(${order.Id_Orden})" class="action-btn view-btn">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button onclick="showImage('${order.comprobante_pago}')" class="action-btn image-btn">
+                    <button onclick="showImage('${order.imagen}')" class="action-btn image-btn">
                         <i class="fas fa-image"></i>
                     </button>
                     <button onclick="printOrder(${order.Id_Orden})" class="action-btn print-btn">
