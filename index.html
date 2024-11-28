@@ -54,6 +54,9 @@
                     </form>
                 </div>
                 <div class="col-auto ms-auto">
+                    <a class="btn btn-danger me-2 d-none" id="adminButton" onclick="irAPanelAdmin(event)">
+                        <i class="bi bi-gear-fill"></i> Panel Admin
+                    </a>
                     <a href="carrito.html" class="btn btn-success me-2 position-relative">
                         <i class="bi bi-cart"></i>
                         <span id="cartCounter" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -146,24 +149,30 @@
         function actualizarBotonLogin() {
             const userData = localStorage.getItem('userData');
             const loginButton = document.getElementById('loginButton');
+            const adminButton = document.getElementById('adminButton');
             
             if (userData) {
                 const user = JSON.parse(userData);
                 loginButton.innerHTML = `<span class="d-none d-md-inline">Sesión: ${user.name}</span><span class="d-md-none"><i class="bi bi-person-check"></i></span>`;
                 loginButton.href = '#';
                 
+                // Solo verificamos si es Jimena Arriagada
+                if (user.name === 'Jimena Arriagada') {
+                    adminButton.classList.remove('d-none');
+                } else {
+                    adminButton.classList.add('d-none');
+                }
+                
                 // Agregar menú desplegable para cerrar sesión
                 loginButton.classList.add('dropdown-toggle');
                 loginButton.setAttribute('data-bs-toggle', 'dropdown');
                 
-                // Crear el menú desplegable
                 const dropdownMenu = document.createElement('ul');
                 dropdownMenu.className = 'dropdown-menu dropdown-menu-end';
                 dropdownMenu.innerHTML = `
                     <li><a class="dropdown-item" href="#" onclick="cerrarSesion()">Cerrar sesión</a></li>
                 `;
                 
-                // Agregar el menú después del botón
                 loginButton.parentNode.appendChild(dropdownMenu);
             }
         }
@@ -175,6 +184,17 @@
             localStorage.removeItem('adminToken');
             window.location.reload();
         }
+
+        // Nueva función para manejar el clic en el botón de admin
+        function irAPanelAdmin(event) {
+            event.preventDefault();
+            // Crear token de admin
+            const adminToken = 'admin_' + Math.random().toString(36).substr(2) + Date.now();
+            localStorage.setItem('adminToken', adminToken);
+            // Redirigir a la página de admin con el token
+            window.location.href = `adproductos.html?token=${adminToken}`;
+        }
+
         // Ejecutar cuando se carga la página
         window.addEventListener('load', actualizarBotonLogin);
     </script>
