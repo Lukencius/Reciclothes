@@ -117,7 +117,10 @@
                     localStorage.setItem('userToken', result.token);
                     localStorage.setItem('userData', JSON.stringify({
                         email: data.email,
-                        name: result.user.name
+                        name: result.user.name,
+                        phone: result.user.phone,
+                        address: result.user.address,
+                        numero_casa: result.user.numero_casa
                     }));
 
                     // Mostrar mensaje de bienvenida
@@ -165,7 +168,7 @@
             if (token && userData) {
                 const user = JSON.parse(userData);
                 if (user.email === 'jimena@admin.com') {
-                    window.location.href = 'admin.html?token=' + localStorage.getItem('adminToken');
+                    window.location.href = 'index.html?token=' + localStorage.getItem('adminToken');
                 } else {
                     window.location.href = 'index.html';
                 }

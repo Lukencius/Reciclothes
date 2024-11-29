@@ -39,14 +39,14 @@ app.get('/signup', (req, res) => {
 app.post('/signup', async (req, res) => {
     const connection = await createDbConnection();
     try {
-        const { name, email, phone, address, password } = req.body;
+        const { name, email, phone, address, numero_casa, password } = req.body;
         const saltRounds = 10;
         const salt = await bcryptjs.genSalt(saltRounds);
         const passwordHash = await bcryptjs.hash(password, salt);
         
         const [result] = await connection.execute(
-            'INSERT INTO clientes (name, email, phone, address, password_hash, salt) VALUES (?, ?, ?, ?, ?, ?)',
-            [name, email, phone, address, passwordHash, salt]
+            'INSERT INTO clientes (name, email, phone, address, numero_casa, password_hash, salt) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [name, email, phone, address, numero_casa, passwordHash, salt]
         );
         
         res.json({ 
@@ -100,7 +100,10 @@ app.post('/login', async (req, res) => {
             user: {
                 id: user.id,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                phone: user.phone,
+                address: user.address,
+                numero_casa: user.numero_casa
             }
         });
     } catch (error) {
