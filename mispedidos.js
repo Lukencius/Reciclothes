@@ -93,7 +93,10 @@ function updateOrdersTable() {
                 </span>
             </td>
             <td>
-                <button onclick="showImage('${order.imagen}')" class="action-btn image-btn">
+                <button onclick="uploadImageToCloudinary(${order.Id_Orden})" class="action-btn upload-btn" title="Subir comprobante">
+                    <i class="fas fa-upload"></i>
+                </button>
+                <button onclick="showImage('${order.imagen}')" class="action-btn image-btn" title="Ver comprobante">
                     <i class="fas fa-image"></i>
                 </button>
             </td>
@@ -364,4 +367,85 @@ function actualizarContadores(pedidos) {
             countElement.textContent = contadores[estado];
         }
     });
+}
+
+async function uploadImageToCloudinary(orderId) {
+    try {
+        // Crear input de archivo temporal
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        
+        // Manejar la selección del archivo
+        fileInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Mostrar loading
+            Swal.fire({
+                title: 'Subiendo comprobante...',
+                text: 'Por favor espere',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                // Subir a Cloudinary
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', 'pruebas_reciclothes');
+
+                const response = await fetch('https://api.cloudinary.com/v1_1/dvyrnjwfi/image/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Error al subir la imagen');
+                const data = await response.json();
+
+                // Actualizar la orden con la URL de la imagen
+                if (data.secure_url) {
+                    const updateResponse = await fetch(`${API_URL}/ordenes/${orderId}/comprobante`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ imagen: data.secure_url })
+                    });
+
+                    if (!updateResponse.ok) throw new Error('Error al actualizar el comprobante');
+
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: 'Comprobante subido correctamente',
+                        timer: 1500
+                    });
+
+                    // Recargar los pedidos para mostrar el cambio
+                    await loadOrders();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Error al subir el comprobante'
+                });
+            }
+        };
+
+        // Activar el input de archivo
+        fileInput.click();
+
+    } catch (error) {
+        console.error('Error:', error);
+        await Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'Error al procesar el comprobante'
+        });
+    }
 }

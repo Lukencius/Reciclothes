@@ -517,3 +517,38 @@ app.get('/api/ordenes/cliente/:Id_Cliente', async (req, res) => {
         }
     }
 });
+
+// Endpoint para actualizar el comprobante de una orden
+app.put('/api/ordenes/:id/comprobante', async (req, res) => {
+    let connection;
+    try {
+        const { id } = req.params;
+        const { imagen } = req.body;
+
+        if (!imagen) {
+            return res.status(400).json({ error: 'La URL de la imagen es requerida' });
+        }
+
+        connection = await createDbConnection();
+        await connection.execute(
+            'UPDATE ordenes SET imagen = ? WHERE Id_Orden = ?',
+            [imagen, id]
+        );
+
+        res.json({ 
+            success: true,
+            message: 'Comprobante actualizado correctamente' 
+        });
+    } catch (error) {
+        console.error('Error al actualizar comprobante:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Error al actualizar el comprobante' 
+        });
+    } finally {
+        if (connection) {
+            await connection.end();
+        }
+    }
+});
+
