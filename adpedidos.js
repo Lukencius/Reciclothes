@@ -63,6 +63,8 @@ function updateOrdersTable() {
                 <td>${order.cliente}</td>
                 <td>${order.email}</td>
                 <td>${order.telefono}</td>
+                <td>${order.direccion}</td>
+                <td>${order.numero_casa}</td>
                 <td>${order.products}</td>
                 <td>${new Date(order.order_date).toLocaleDateString('es-CL')}</td>
                 <td>$${parseFloat(order.total_amount).toLocaleString('es-CL')}</td>
@@ -72,14 +74,8 @@ function updateOrdersTable() {
                     </span>
                 </td>
                 <td>
-                    <button onclick="showOrderDetails(${order.Id_Orden})" class="action-btn view-btn">
-                        <i class="fas fa-eye"></i>
-                    </button>
                     <button onclick="showImage('${order.imagen}')" class="action-btn image-btn">
                         <i class="fas fa-image"></i>
-                    </button>
-                    <button onclick="printOrder(${order.Id_Orden})" class="action-btn print-btn">
-                        <i class="fas fa-print"></i>
                     </button>
                 </td>
             `;
