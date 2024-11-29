@@ -380,15 +380,19 @@ app.post('/api/ordenes', authenticateToken, async (req, res) => {
             `INSERT INTO ordenes (
                 cliente, 
                 email, 
-                telefono, 
+                telefono,
+                direccion,
+                numero_casa,
                 products, 
                 total_amount, 
                 estado
-            ) VALUES (?, ?, ?, ?, ?, ?)`,
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 cliente, 
                 email, 
                 telefono, 
+                direccion,
+                numero_casa,
                 productsJSON, 
                 total_amount, 
                 'Pendiente'
