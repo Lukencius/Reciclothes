@@ -23,10 +23,10 @@ async function cargarProductos() {
         const response = await fetch('https://reciclothes.onrender.com/api/productos');
         const productos = await response.json();
         
-        // Filtrar productos si hay una categoría específica
-        const productosFiltrados = categoria 
-            ? productos.filter(producto => producto.category === categoria)
-            : productos;
+        // Filtrar productos por categoría y stock
+        const productosFiltrados = productos
+            .filter(producto => producto.stock >= 1) // Filtrar por stock primero
+            .filter(producto => !categoria || producto.category === categoria); // Luego por categoría si existe
         
         // Limpiar el contenedor antes de agregar nuevos productos
         productosContainer.innerHTML = ''; 
