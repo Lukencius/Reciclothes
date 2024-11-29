@@ -98,7 +98,7 @@ app.post('/login', async (req, res) => {
             success: true,
             token,
             user: {
-                id: user.id,
+                Id_Cliente: user.Id_Cliente,
                 name: user.name,
                 email: user.email,
                 phone: user.phone,
@@ -365,10 +365,10 @@ app.delete('/api/Productos/:id', async (req, res) => {
 app.post('/api/ordenes', authenticateToken, async (req, res) => {
     const connection = await createDbConnection();
     try {
-        const { cliente, email, telefono, direccion, numero_casa, products, total_amount } = req.body;
+        const {Id_Cliente, cliente, email, telefono, direccion, numero_casa, products, total_amount } = req.body;
 
         // Validar datos requeridos
-        if (!cliente || !email || !telefono || !direccion || !numero_casa || !products || !total_amount) {
+        if (!Id_Cliente || !cliente || !email || !telefono || !direccion || !numero_casa || !products || !total_amount) {
             return res.status(400).json({ 
                 success: false, 
                 message: 'Faltan datos requeridos para la orden' 
@@ -381,6 +381,7 @@ app.post('/api/ordenes', authenticateToken, async (req, res) => {
         // Insertar la orden
         const [result] = await connection.execute(
             `INSERT INTO ordenes (
+                Id_Cliente,
                 cliente, 
                 email, 
                 telefono,
@@ -389,8 +390,9 @@ app.post('/api/ordenes', authenticateToken, async (req, res) => {
                 products, 
                 total_amount, 
                 estado
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
+                Id_Cliente,
                 cliente, 
                 email, 
                 telefono, 
@@ -476,6 +478,31 @@ app.get('/api/ordenes', async (req, res) => {
             FROM ordenes
             ORDER BY order_date DESC
         `);
+        res.json(ordenes);
+    } catch (error) {
+        console.error('Error al obtener las órdenes:', error);
+        res.status(500).json({ 
+            success: false,
+            mensaje: 'Error al obtener las órdenes',
+            error: error.message 
+        });
+    } finally {
+        if (connection) {
+            await connection.end();
+        }
+    }
+});
+
+app.get('/api/ordenes/cliente/:Id_Cliente', async (req, res) => {
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        const [ordenes] = await connection.execute(`
+            SELECT *
+            FROM ordenes
+            WHERE Id_Cliente = ?
+            ORDER BY order_date DESC
+        `, [req.params.Id_Cliente]);
         res.json(ordenes);
     } catch (error) {
         console.error('Error al obtener las órdenes:', error);

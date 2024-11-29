@@ -458,7 +458,9 @@
                 }
 
                 const token = localStorage.getItem('userToken');
-                if (!token) {
+                const userData = JSON.parse(localStorage.getItem('userData'));
+                
+                if (!token || !userData) {
                     throw new Error('No hay sesión activa');
                 }
 
@@ -472,8 +474,9 @@
                     }
                 }
 
-                // Crear objeto con el formato de la tabla orden
+                // Crear objeto con el formato de la tabla orden incluyendo el ID del cliente
                 const datosOrden = {
+                    Id_Cliente: userData.Id_Cliente,
                     cliente: formData.get('nombre').trim(),
                     email: formData.get('email').trim(),
                     telefono: formData.get('telefono').trim(),
@@ -488,6 +491,7 @@
                     total_amount: carrito.reduce((sum, item) => sum + (item.price * item.cantidad), 0),
                     estado: 'pendiente'
                 };
+                console.log(datosOrden);
 
                 const response = await fetch('https://reciclothes.onrender.com/api/ordenes', {
                     method: 'POST',
