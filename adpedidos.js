@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     verificarAdmin();
     loadOrders();
     setupEventListeners();
+    inicializarBusqueda();
 });
 
 // Verificar si es admin
@@ -31,6 +32,7 @@ async function loadOrders() {
         currentPage = 1; // Resetear a la primera página
         updateOrdersTable();
         updateStats();
+        actualizarContadores(ordenes);
     } catch (error) {
         console.error('Error:', error);
         Swal.fire({
@@ -53,38 +55,39 @@ function updateOrdersTable() {
 
     if (ordersToShow.length === 0) {
         const row = document.createElement('tr');
-        row.innerHTML = '<td colspan="9" class="text-center">No hay órdenes para mostrar</td>';
+        row.innerHTML = '<td colspan="11" class="text-center">No se encontraron resultados</td>';
         tableBody.appendChild(row);
-    } else {
-        ordersToShow.forEach(order => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>#${order.Id_Orden}</td>
-                <td>${order.cliente}</td>
-                <td>${order.email}</td>
-                <td>${order.telefono}</td>
-                <td>${order.direccion}</td>
-                <td>${order.numero_casa}</td>
-                <td>${order.products}</td>
-                <td>${new Date(order.order_date).toLocaleDateString('es-CL')}</td>
-                <td>$${parseFloat(order.total_amount).toLocaleString('es-CL')}</td>
-                <td>
-                    <span class="status-badge status-${order.estado.toLowerCase()}">
-                        ${order.estado}
-                    </span>
-                    </td>
-                    <td>
-                    <button onclick="cambiarEstado(${order.Id_Orden}, '${order.estado}')" class="action-btn status-btn">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button onclick="showImage('${order.imagen}')" class="action-btn image-btn">
-                        <i class="fas fa-image"></i>
-                    </button>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
+        return;
     }
+
+    ordersToShow.forEach(order => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>#${order.Id_Orden}</td>
+            <td>${order.cliente}</td>
+            <td>${order.email}</td>
+            <td>${order.telefono}</td>
+            <td>${order.direccion}</td>
+            <td>${order.numero_casa}</td>
+            <td>${order.products}</td>
+            <td>${new Date(order.order_date).toLocaleDateString('es-CL')}</td>
+            <td>$${parseFloat(order.total_amount).toLocaleString('es-CL')}</td>
+            <td>
+                <span class="status-badge status-${order.estado.toLowerCase()}">
+                    ${order.estado}
+                </span>
+                </td>
+                <td>
+                <button onclick="cambiarEstado(${order.Id_Orden}, '${order.estado}')" class="action-btn status-btn">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="showImage('${order.imagen}')" class="action-btn image-btn">
+                    <i class="fas fa-image"></i>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
     
     updatePagination();
 }
@@ -246,4 +249,108 @@ async function cambiarEstado(orderId, estadoActual) {
             });
         }
     }
+}
+
+// Función para la búsqueda de pedidos
+function inicializarBusqueda() {
+    const searchInput = document.querySelector('.search-box input');
+    let timeoutId;
+    
+    searchInput.addEventListener('input', function(e) {
+        clearTimeout(timeoutId); // Limpiar el timeout anterior
+        
+        // Crear un nuevo timeout para evitar muchas actualizaciones
+        timeoutId = setTimeout(() => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            
+            // Filtrar el array original
+            const ordenesFiltradas = searchTerm === '' ? 
+                currentOrders : 
+                currentOrders.filter(order => 
+                    order.Id_Orden.toString().toLowerCase().includes(searchTerm) ||
+                    order.cliente.toLowerCase().includes(searchTerm) ||
+                    order.email.toLowerCase().includes(searchTerm) ||
+                    order.estado.toLowerCase().includes(searchTerm) ||
+                    order.telefono.toLowerCase().includes(searchTerm) ||
+                    order.direccion.toLowerCase().includes(searchTerm)
+                );
+
+            // Actualizar la tabla con los resultados filtrados
+            const tableBody = document.getElementById('ordersTableBody');
+            tableBody.innerHTML = '';
+
+            if (ordenesFiltradas.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="11" class="text-center">No se encontraron resultados</td>';
+                tableBody.appendChild(row);
+                return;
+            }
+
+            // Mostrar los resultados filtrados
+            ordenesFiltradas.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>#${order.Id_Orden}</td>
+                    <td>${order.cliente}</td>
+                    <td>${order.email}</td>
+                    <td>${order.telefono}</td>
+                    <td>${order.direccion}</td>
+                    <td>${order.numero_casa}</td>
+                    <td>${order.products}</td>
+                    <td>${new Date(order.order_date).toLocaleDateString('es-CL')}</td>
+                    <td>$${parseFloat(order.total_amount).toLocaleString('es-CL')}</td>
+                    <td>
+                        <span class="status-badge status-${order.estado.toLowerCase()}">
+                            ${order.estado}
+                        </span>
+                    </td>
+                    <td>
+                        <button onclick="cambiarEstado(${order.Id_Orden}, '${order.estado}')" class="action-btn status-btn">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="showImage('${order.imagen}')" class="action-btn image-btn">
+                            <i class="fas fa-image"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }, 300); // Esperar 300ms después de que el usuario deje de escribir
+    });
+}
+
+// Función para actualizar los contadores de estado
+function actualizarContadores(pedidos) {
+    // Inicializar contadores con los estados correctos
+    const contadores = {
+        'Pendiente': 0,
+        'En Proceso': 0,
+        'Enviado': 0,
+        'Entregado': 0,
+        'Cancelado': 0
+    };
+    
+    // Contar pedidos por estado
+    pedidos.forEach(pedido => {
+        if (pedido.estado in contadores) {
+            contadores[pedido.estado]++;
+        }
+    });
+    
+    // Actualizar los elementos en el DOM
+    document.getElementById('pendienteCount').textContent = contadores['Pendiente'];
+    document.getElementById('procesoCount').textContent = contadores['En Proceso'];
+    document.getElementById('enviadoCount').textContent = contadores['Enviado'];
+    document.getElementById('entregadoCount').textContent = contadores['Entregado'];
+    document.getElementById('canceladoCount').textContent = contadores['Cancelado'];
+    
+    // Actualizar las stat-cards con los mismos contadores
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach(card => {
+        const estado = card.getAttribute('data-status');
+        const countElement = card.querySelector('.stat-info p');
+        if (countElement && estado in contadores) {
+            countElement.textContent = contadores[estado];
+        }
+    });
 }

@@ -41,32 +41,39 @@
             <div class="orders-header">
                 <h1>Gestión de Pedidos</h1>
                 <div class="quick-stats">
-                    <div class="stat-card">
+                    <div class="stat-card" data-status="Pendiente">
                         <i class="fas fa-clock"></i>
                         <div class="stat-info">
                             <h3>Pendientes</h3>
-                            <p id="pendingCount">0</p>
+                            <p id="pendienteCount">0</p>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <i class="fas fa-box"></i>
+                    <div class="stat-card" data-status="En Proceso">
+                        <i class="fas fa-cog"></i>
                         <div class="stat-info">
                             <h3>En Proceso</h3>
-                            <p id="processingCount">0</p>
+                            <p id="procesoCount">0</p>
                         </div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" data-status="Enviado">
                         <i class="fas fa-truck"></i>
                         <div class="stat-info">
-                            <h3>En Envío</h3>
-                            <p id="shippingCount">0</p>
+                            <h3>Enviados</h3>
+                            <p id="enviadoCount">0</p>
                         </div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" data-status="Entregado">
                         <i class="fas fa-check-circle"></i>
                         <div class="stat-info">
-                            <h3>Completados</h3>
-                            <p id="completedCount">0</p>
+                            <h3>Entregados</h3>
+                            <p id="entregadoCount">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card" data-status="Cancelado">
+                        <i class="fas fa-times-circle"></i>
+                        <div class="stat-info">
+                            <h3>Cancelados</h3>
+                            <p id="canceladoCount">0</p>
                         </div>
                     </div>
                 </div>
