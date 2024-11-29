@@ -72,8 +72,11 @@ function updateOrdersTable() {
                     <span class="status-badge status-${order.estado.toLowerCase()}">
                         ${order.estado}
                     </span>
-                </td>
-                <td>
+                    </td>
+                    <td>
+                    <button onclick="cambiarEstado(${order.Id_Orden}, '${order.estado}')" class="action-btn status-btn">
+                        <i class="fas fa-edit"></i>
+                    </button>
                     <button onclick="showImage('${order.imagen}')" class="action-btn image-btn">
                         <i class="fas fa-image"></i>
                     </button>
@@ -188,4 +191,59 @@ function showImage(imageUrl) {
             };
         }
     });
+}
+
+// Agregar esta nueva función para manejar el cambio de estado
+async function cambiarEstado(orderId, estadoActual) {
+    const { value: nuevoEstado } = await Swal.fire({
+        title: 'Cambiar Estado del Pedido',
+        input: 'select',
+        inputOptions: {
+            'Pendiente': 'Pendiente',
+            'En Proceso': 'En Proceso',
+            'Enviado': 'Enviado',
+            'Entregado': 'Entregado',
+            'Cancelado': 'Cancelado'
+        },
+        inputValue: estadoActual,
+        showCancelButton: true,
+        cancelButtonText: 'Cancelar',
+        confirmButtonText: 'Guardar',
+        inputValidator: (value) => {
+            if (!value) {
+                return 'Debes seleccionar un estado';
+            }
+        }
+    });
+
+    if (nuevoEstado) {
+        try {
+            const response = await fetch(`${API_URL}/ordenes/${orderId}/estado`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                },
+                body: JSON.stringify({ estado: nuevoEstado })
+            });
+
+            if (!response.ok) throw new Error('Error al actualizar el estado');
+
+            await Swal.fire({
+                icon: 'success',
+                title: 'Estado actualizado',
+                text: 'El estado del pedido ha sido actualizado correctamente'
+            });
+
+            // Recargar los pedidos para mostrar el cambio
+            await loadOrders();
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo actualizar el estado del pedido'
+            });
+        }
+    }
 }
