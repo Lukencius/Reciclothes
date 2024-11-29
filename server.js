@@ -360,53 +360,68 @@ app.delete('/api/Productos/:id', async (req, res) => {
 });
 // Endpoint para crear una nueva orden
 app.post('/api/ordenes', authenticateToken, async (req, res) => {
+    const connection = await createDbConnection();
     try {
-        const { 
-            cliente, 
-            email, 
-            telefono, 
-            direccion_envio, 
-            numero_casa, 
-            products, 
-            total_amount, 
-            estado 
-        } = req.body;
+        const { cliente, email, telefono, direccion, numero_casa, products, total_amount } = req.body;
 
-        // Validar que todos los campos requeridos estén presentes
-        if (!cliente || !email || !telefono || !direccion_envio || !numero_casa || !products || !total_amount) {
-            return res.status(400).json({ success: false, message: 'Faltan campos requeridos' });
+        // Validar datos requeridos
+        if (!cliente || !email || !telefono || !direccion || !numero_casa || !products || !total_amount) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Faltan datos requeridos para la orden' 
+            });
         }
 
-        // Insertar la orden en la base de datos
-        const [result] = await pool.query(
-            `INSERT INTO ordenes (cliente, email, telefono, direccion_envio, numero_casa, total_amount, estado) 
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [cliente, email, telefono, direccion_envio, numero_casa, total_amount, estado || 'pendiente']
+        // Convertir el array de productos a JSON string
+        const productsJSON = JSON.stringify(products);
+
+        // Insertar la orden
+        const [result] = await connection.execute(
+            `INSERT INTO ordenes (
+                cliente, 
+                email, 
+                telefono,
+                direccion,
+                numero_casa,
+                products, 
+                total_amount, 
+                estado
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                cliente, 
+                email, 
+                telefono, 
+                direccion,
+                numero_casa,
+                productsJSON, 
+                total_amount, 
+                'Pendiente'
+            ]
         );
 
-        const ordenId = result.insertId;
-
-        // Insertar los productos de la orden
+        // Actualizar el stock de los productos
         for (const product of products) {
-            await pool.query(
-                `INSERT INTO orden_productos (orden_id, producto_id, cantidad) 
-                 VALUES (?, ?, ?)`,
-                [ordenId, product.id, product.cantidad]
+            await connection.execute(
+                'UPDATE Productos SET stock = stock - ? WHERE Id_Producto = ?',
+                [product.cantidad, product.id]
             );
         }
 
-        res.json({ 
-            success: true, 
-            message: 'Orden creada exitosamente', 
-            Id_Orden: ordenId 
+        res.json({
+            success: true,
+            message: 'Orden creada exitosamente',
+            Id_Orden: result.insertId
         });
 
     } catch (error) {
         console.error('Error al crear la orden:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al procesar la orden' 
+        res.status(500).json({
+            success: false,
+            message: 'Error al procesar la orden',
+            error: error.message
         });
+    } finally {
+        await connection.end();
     }
 });
 

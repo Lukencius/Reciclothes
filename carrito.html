@@ -465,7 +465,7 @@
                 const formData = new FormData(event.target);
                 
                 // Validar campos requeridos
-                const camposRequeridos = ['nombre', 'email', 'direccion', 'telefono'];
+                const camposRequeridos = ['nombre', 'email', 'direccion', 'telefono', 'numeroCasa'];
                 for (const campo of camposRequeridos) {
                     if (!formData.get(campo)) {
                         throw new Error(`El campo ${campo} es requerido`);
@@ -477,6 +477,8 @@
                     cliente: formData.get('nombre').trim(),
                     email: formData.get('email').trim(),
                     telefono: formData.get('telefono').trim(),
+                    direccion: formData.get('direccion').trim(),
+                    numero_casa: formData.get('numeroCasa').trim(),
                     products: carrito.map(item => ({
                         id: item.Id_Producto,
                         name: item.name,
