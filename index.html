@@ -81,7 +81,27 @@
             <div class="container">
                 <h2 class="text-center mb-4">Nuestros Productos</h2>
                 <div id="productosContainer" class="row">
-                    <!-- Las tarjetas de productos se insertarán aquí dinámicamente -->
+                    <template id="producto-template">
+                        <div class="col-md-4 mb-4">
+                            <div class="card product-card h-100">
+                                <img loading="lazy" 
+                                     class="card-img-top product-card-img"
+                                     data-src="" 
+                                     alt=""
+                                     onerror="this.src='media/placeholder.webp'">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title"></h5>
+                                    <p class="card-text"></p>
+                                    <div class="mt-auto">
+                                        <p class="precio mb-2">$<span class="precio-valor"></span></p>
+                                        <button class="btn btn-success btn-sm w-100 agregar-carrito">
+                                            <i class="bi bi-cart-plus"></i> Agregar al carrito
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
                 </div>
             </div>
         </section>
