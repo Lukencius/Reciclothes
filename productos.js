@@ -39,7 +39,7 @@ async function cargarProductos() {
             return `
                 <div class="col-md-4 mb-4">
                     <div class="card product-card" style="cursor: pointer;" onclick="verDetalleProducto(${JSON.stringify(producto).replace(/"/g, '&quot;')})">
-                        <img src="${imgSrc}" class="card-img-top product-card-img" alt="${producto.name}" onerror="this.src='media/polera.png'">
+                        <img loading="lazy" src="${imgSrc}" class="card-img-top product-card-img" alt="${producto.name}" onerror="this.src='media/polera.png'">
                         <div class="card-body">
                             <h5 class="card-title">${producto.name}</h5>
                             <p class="card-text">${producto.description}</p>
