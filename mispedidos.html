@@ -85,6 +85,31 @@
                     <button class="filter-btn" data-filter="completed">Completados</button>
                 </div>
             </div> -->
+            <div class="info-bancaria" style="text-align: right; margin: 20px;">
+                <h3>Datos Bancarios de ReciClothes</h3>
+                <i class="fas fa-question-circle" 
+                   style="font-size: 24px; color: #28a745; cursor: pointer;"
+                   onclick="mostrarDatosBancarios()"></i>
+            </div>
+
+            <script>
+                function mostrarDatosBancarios() {
+                    Swal.fire({
+                        title: 'Datos Bancarios',
+                        html: `
+                            <div style="text-align: left;">
+                                <p><strong>Nombre:</strong> Jimena Arriagada T.</p>
+                                <p><strong>Rut:</strong> 11.199.956-2</p>
+                                <p><strong>Cuenta Rut:</strong> 11.199.956</p>
+                                <p><strong>Banco:</strong> BancoEstado</p>
+                            </div>
+                        `,
+                        icon: 'info',
+                        confirmButtonColor: '#28a745',
+                        confirmButtonText: 'Cerrar'
+                    });
+                }
+            </script>
 
             <div class="orders-table">
                 <table>
