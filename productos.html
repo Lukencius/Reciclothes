@@ -48,11 +48,19 @@
                         </ul>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <form class="d-flex">
-                        <input class="form-control me-2" type="search" placeholder="Buscar productos" aria-label="Buscar">
-                        <button class="btn btn-outline-light" type="submit">Buscar</button>
-                    </form>
+               <div class="col-auto ms-auto">
+                    <a class="btn btn-danger me-2 d-none" id="adminButton" onclick="irAPanelAdmin(event)">
+                        <i class="bi bi-gear-fill"></i> Panel Admin
+                    </a>
+                    <a href="carrito.html" class="btn btn-success me-2 position-relative">
+                        <i class="bi bi-cart"></i>
+                        <span id="cartCounter" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            0
+                        </span>
+                    </a>
+                    <a href="login.html" class="btn btn-success" id="loginButton">
+                        <i class="bi bi-person"></i>
+                    </a>
                 </div>
                 <div class="col-auto ms-auto">
                     <a href="carrito.html" class="btn btn-success me-2 position-relative">
