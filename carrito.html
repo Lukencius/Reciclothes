@@ -512,7 +512,7 @@
                 if (resultado.success) {
                     const modal = bootstrap.Modal.getInstance(document.getElementById('formularioPagoModal'));
                     modal.hide();
-                    alert(`¡Compra procesada con éxito!\nTu número de orden es: ${resultado.Id_Orden}`);
+                    alert(`¡Compra procesada con éxito!\nTu número de orden es: ${resultado.Id_Orden}\nRecuerda subir el comprobante de pago en la sección "Mis Pedidos"`);
                     localStorage.removeItem('carrito');
                     window.location.href = 'index.html';
                 } else {
