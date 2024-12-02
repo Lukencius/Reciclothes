@@ -25,11 +25,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Evento input para la búsqueda
+        // Evento input para la búsqueda
     searchInput.addEventListener('input', function(e) {
         const searchTerm = e.target.value.toLowerCase().trim();
         
-        // Limpiar resultados si el término de búsqueda está vacío
         if (searchTerm === '') {
             searchResults.style.display = 'none';
             return;
@@ -37,24 +36,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Filtrar productos
         const resultados = productos.filter(producto => 
-            producto.name.toLowerCase().includes(searchTerm)
+            producto.name.toLowerCase().includes(searchTerm) && 
+            producto.stock > 0
         );
 
-        console.log('Resultados encontrados:', resultados); // Para depuración
+        console.log('Resultados encontrados:', resultados);
 
         // Mostrar resultados
         if (resultados.length > 0) {
-            searchResults.innerHTML = resultados.map(producto => `
-                <div class="search-item" onclick="window.location.href='productos.html?id=${producto.Id_Producto}'">
-                    <img src="${producto.imagen || 'media/placeholder.png'}" 
-                         alt="${producto.name}"
-                         onerror="this.src='media/placeholder.png'">
-                    <div class="search-item-details">
-                        <div class="search-item-name">${producto.name}</div>
-                        <div class="search-item-price">$${producto.price}</div>
+            searchResults.innerHTML = resultados.map(producto => {
+                // Convertir el producto a string y escapar las comillas
+                const productoString = JSON.stringify(producto).replace(/"/g, '&quot;');
+                return `
+                    <div class="search-item" onclick="verDetalleProducto(${productoString})">
+                        <img src="${producto.imagen || 'media/placeholder.png'}" 
+                             alt="${producto.name}"
+                             onerror="this.src='media/placeholder.png'">
+                        <div class="search-item-details">
+                            <div class="search-item-name">${producto.name}</div>
+                            <div class="search-item-price">$${producto.price}</div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
             searchResults.style.display = 'block';
         } else {
             searchResults.innerHTML = '<div class="search-item">No se encontraron resultados</div>';
