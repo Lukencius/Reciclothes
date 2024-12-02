@@ -13,11 +13,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target.classList.contains('dropdown-item')) {
             let selectedCategory = e.target.textContent;
             title.innerHTML = selectedCategory;
+            
+            // Filtrar primero por stock
+            const productosFiltrados = productos.filter(producto => producto.stock >= 1);
+            
             if(selectedCategory === 'Niños') {
-                selectedCategory = 'Ninos' 
-                filtrarProductos(selectedCategory); 
+                selectedCategory = 'Ninos';
+                filtrarProductos(selectedCategory, productosFiltrados);
             }
-            filtrarProductos(selectedCategory);
+            filtrarProductos(selectedCategory, productosFiltrados);
         }
     });
 
