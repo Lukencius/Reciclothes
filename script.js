@@ -14,14 +14,14 @@ document.addEventListener('DOMContentLoaded', function() {
             let selectedCategory = e.target.textContent;
             title.innerHTML = selectedCategory;
             
-            // Filtrar primero por stock
-            const productosFiltrados = productos.filter(producto => producto.stock >= 1);
-            
             if(selectedCategory === 'Niños') {
                 selectedCategory = 'Ninos';
-                filtrarProductos(selectedCategory, productosFiltrados);
             }
-            filtrarProductos(selectedCategory, productosFiltrados);
+            // Filtrar por categoría y stock mayor a 0
+            const productosFiltrados = productos.filter(producto => 
+                producto.category === selectedCategory && producto.stock > 0
+            );
+            mostrarProductos(productosFiltrados);
         }
     });
 
