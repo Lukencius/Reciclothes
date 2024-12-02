@@ -13,23 +13,23 @@
     <link rel="icon" href="media/ReciClothes_sinf.png">
 </head>
 <body>
-    <header class="bg-success py-2">
-        <div class="leaves-container">
-            <div class="leaf"></div>
-            <div class="leaf"></div>
-            <div class="leaf"></div>
-            <div class="leaf"></div>
-            <div class="leaf"></div>
-            <div class="leaf"></div>
-            <div class="leaf"></div>
-            <div class="leaf"></div>
-            <div class="leaf"></div>
-            <div class="leaf"></div>
-        </div>
-        <div class="container-fluid">
+    <div class="leaves-container">
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+    </div>
+    <header class="bg-success py-2 fixed-top">
+        <div class="container-fluid " >
             <div class="row align-items-center">
                 <div class="col-auto">
-                    <a href="#" class="text-white text-decoration-none d-flex align-items-center">
+                    <a href="index.html" class="text-white text-decoration-none d-flex align-items-center">
                         <img src="media/ReciClothes_sinf.png" width="60" height="60" class="d-inline-block align-top me-2" alt="Reciclothes logo">
                         <span class="fs-5 fw-bold custom-font">Reciclothes</span>
                     </a>
@@ -47,25 +47,18 @@
                         </ul>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <form class="d-flex">
-                        <input class="form-control me-2" type="search" placeholder="Buscar productos" aria-label="Buscar">
-                        <button class="btn btn-outline-light" type="submit">Buscar</button>
-                    </form>
-                </div>
                 <div class="col-auto ms-auto">
-                    <a class="btn btn-danger me-2 d-none" id="adminButton" onclick="irAPanelAdmin(event)">
-                        <i class="bi bi-gear-fill"></i> Panel Admin
-                    </a>
-                    <a href="carrito.html" class="btn btn-success me-2 position-relative">
+                    <a href="carrito.html" class="btn btn-success me-2">
                         <i class="bi bi-cart"></i>
-                        <span id="cartCounter" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            0
-                        </span>
                     </a>
                     <a href="login.html" class="btn btn-success" id="loginButton">
                         <i class="bi bi-person"></i>
                     </a>
+                    <div id="adminButton" style="display: none;" class="ms-2">
+                        <a href="admin.html" class="btn btn-success">
+                            <i class="fas fa-user-shield"></i> Panel Admin
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
