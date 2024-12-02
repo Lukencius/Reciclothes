@@ -1,73 +1,127 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Función para el desplazamiento suave
-    function smoothScroll(target, duration) {
-        var targetElement = document.querySelector(target);
-        var targetPosition = targetElement.getBoundingClientRect().top;
-        var startPosition = window.pageYOffset;
-        var startTime = null;
+    const category = document.getElementById('category');
+    const title = document.getElementById('title'); 
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    let productos = []; // Array para almacenar todos los productos
 
-        function animation(currentTime) {
-            if (startTime === null) startTime = currentTime;
-            var timeElapsed = currentTime - startTime;
-            var run = ease(timeElapsed, startPosition, targetPosition, duration);
-            window.scrollTo(0, run);
-            if (timeElapsed < duration) requestAnimationFrame(animation);
+    // Cargar productos al inicio
+    cargarProductos();
+
+    // Evento para filtrar productos por categoría
+    category.addEventListener('click', function(e) {
+        if (e.target.classList.contains('dropdown-item')) {
+            let selectedCategory = e.target.textContent;
+            title.innerHTML = selectedCategory;
+            if(selectedCategory === 'Niños') {
+                selectedCategory = 'Ninos' 
+                filtrarProductos(selectedCategory); 
+            }
+            filtrarProductos(selectedCategory);
         }
-
-        function ease(t, b, c, d) {
-            t /= d / 2;
-            if (t < 1) return c / 2 * t * t + b;
-            t--;
-            return -c / 2 * (t * (t - 2) - 1) + b;
-        }
-
-        requestAnimationFrame(animation);
-    }
-
-    // Aplicar desplazamiento suave a los enlaces de navegación
-    var navLinks = document.querySelectorAll('nav a');
-    navLinks.forEach(function(link) {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            var target = this.getAttribute('href');
-            smoothScroll(target, 1000);
-        });
     });
 
-    // Slider de ofertas simple
-    var ofertaSlider = document.querySelector('.oferta-slider');
-    var ofertas = [
-        { imagen: 'ruta/a/oferta1.jpg', titulo: 'Oferta 1', descripcion: 'Descripción de la oferta 1' },
-        { imagen: 'ruta/a/oferta2.jpg', titulo: 'Oferta 2', descripcion: 'Descripción de la oferta 2' },
-        { imagen: 'ruta/a/oferta3.jpg', titulo: 'Oferta 3', descripcion: 'Descripción de la oferta 3' }
-    ];
+    // Evento input para la búsqueda
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        
+        // Limpiar resultados si el término de búsqueda está vacío
+        if (searchTerm === '') {
+            searchResults.style.display = 'none';
+            return;
+        }
 
-    function crearSlider() {
-        ofertas.forEach(function(oferta) {
-            var ofertaElement = document.createElement('div');
-            ofertaElement.classList.add('oferta-item');
-            ofertaElement.innerHTML = `
-                <img src="${oferta.imagen}" alt="${oferta.titulo}">
-                <h3>${oferta.titulo}</h3>
-                <p>${oferta.descripcion}</p>
-            `;
-            ofertaSlider.appendChild(ofertaElement);
-        });
-    }
+        // Filtrar productos
+        const resultados = productos.filter(producto => 
+            producto.name.toLowerCase().includes(searchTerm)
+        );
 
-    crearSlider();
+        console.log('Resultados encontrados:', resultados); // Para depuración
 
-    // Validación simple del formulario de newsletter
-    var newsletterForm = document.querySelector('footer form');
-    newsletterForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        var emailInput = this.querySelector('input[type="email"]');
-        if (emailInput.value.trim() === '') {
-            alert('Por favor, introduce tu dirección de correo electrónico.');
+        // Mostrar resultados
+        if (resultados.length > 0) {
+            searchResults.innerHTML = resultados.map(producto => `
+                <div class="search-item" onclick="window.location.href='productos.html?id=${producto.Id_Producto}'">
+                    <img src="${producto.imagen || 'media/placeholder.png'}" 
+                         alt="${producto.name}"
+                         onerror="this.src='media/placeholder.png'">
+                    <div class="search-item-details">
+                        <div class="search-item-name">${producto.name}</div>
+                        <div class="search-item-price">$${producto.price}</div>
+                    </div>
+                </div>
+            `).join('');
+            searchResults.style.display = 'block';
         } else {
-            alert('¡Gracias por suscribirte a nuestro newsletter!');
-            emailInput.value = '';
+            searchResults.innerHTML = '<div class="search-item">No se encontraron resultados</div>';
+            searchResults.style.display = 'block';
         }
     });
+
+    // Cerrar resultados al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.style.display = 'none';
+        }
+    });
+
+    // Función para cargar productos
+    async function cargarProductos() {
+        try {
+            const response = await fetch('https://reciclothes.onrender.com/api/productos');
+            if (!response.ok) {
+                throw new Error('Error al cargar productos');
+            }
+            productos = await response.json();
+            console.log('Productos cargados:', productos); // Para depuración
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // Función para filtrar productos por categoría
+    async function filtrarProductos(category) {
+        const filteredProducts = productos.filter(producto => producto.category === category);
+        mostrarProductos(filteredProducts);
+    }
+
+    // Función para mostrar productos
+    function mostrarProductos(productos) {
+        const productosContainer = document.getElementById('productosContainer');
+        if (!productosContainer) return;
+
+        productosContainer.innerHTML = productos.map(producto => {
+            const imgSrc = producto.imagen || 'media/polera.png';
+            return `
+                <div class="col-md-4 mb-4">
+                    <div class="card product-card" style="cursor: pointer;" onclick="verDetalleProducto(${JSON.stringify(producto).replace(/"/g, '&quot;')})">
+                        <img src="${imgSrc}" class="card-img-top product-card-img" alt="${producto.name}" onerror="this.src='media/polera.png'">
+                        <div class="card-body">
+                            <h5 class="card-title">${producto.name}</h5>
+                            <p class="card-text">${producto.description}</p>
+                            <p class="card-text"><strong>Precio: $${producto.price.toLocaleString('es-CL')}</strong></p>
+                            <p class="card-text">Categoría: ${producto.category}</p>
+                            <p class="card-text">Stock: ${producto.stock}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
 });
 
+// Función para verificar si la API está respondiendo
+async function verificarAPI() {
+    try {
+        const response = await fetch('https://reciclothes.onrender.com/api/productos');
+        const data = await response.json();
+        console.log('Respuesta de la API:', data); // Para depuración
+        return true;
+    } catch (error) {
+        console.error('Error al verificar API:', error);
+        return false;
+    }
+}
+
+// Verificar API al cargar la página
+verificarAPI();
