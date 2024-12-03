@@ -81,7 +81,7 @@
                                     <h2 id="productoTitulo" class="mb-4" style="color: #198754;"></h2>
                                     <p id="productoDescripcion" class="lead mb-4" style="color: white;"></p>
                                     <div class="precio mb-4">
-                                        <h3 style="color: white;">Precio: $<span id="productoPrecio"></span></h3>
+                                        <h3 style="color: white;">Precio: <span id="productoPrecio"></span></h3>
                                     </div>
                                 </div>
                                 <input type="hidden" id="productoId">
@@ -148,7 +148,7 @@
                 document.getElementById('productoImagen').alt = producto.name;
                 document.getElementById('productoTitulo').textContent = producto.name;
                 document.getElementById('productoDescripcion').textContent = producto.description;
-                document.getElementById('productoPrecio').textContent = producto.price.toLocaleString('es-CL');
+                document.getElementById('productoPrecio').textContent = formatearPrecioChileno(producto.price);
                 document.getElementById('productoId').value = producto.Id_Producto; // Agregar esta línea
                 // Limpiar el localStorage después de usar los datos
                 localStorage.removeItem('productoSeleccionado');
