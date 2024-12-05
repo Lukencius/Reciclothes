@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
                              onerror="this.src='media/placeholder.png'">
                         <div class="search-item-details">
                             <div class="search-item-name">${producto.name}</div>
-                            <div class="search-item-price">$${producto.price}</div>
+                            <div class="search-item-price">${formatearPrecioChileno(producto.price)}</div>
                         </div>
                     </div>
                 `;
@@ -102,14 +102,23 @@ document.addEventListener('DOMContentLoaded', function() {
             const imgSrc = producto.imagen || 'media/polera.png';
             return `
                 <div class="col-md-4 mb-4">
-                    <div class="card product-card" style="cursor: pointer;" onclick="verDetalleProducto(${JSON.stringify(producto).replace(/"/g, '&quot;')})">
-                        <img src="${imgSrc}" class="card-img-top product-card-img" alt="${producto.name}" onerror="this.src='media/polera.png'">
+                    <div class="card product-card" style="cursor: pointer; transition: transform 0.3s; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" onclick="verDetalleProducto(${JSON.stringify(producto).replace(/"/g, '&quot;')})">
+                        <img src="${imgSrc}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="${producto.name}" onerror="this.src='media/polera.png'">
                         <div class="card-body">
-                            <h5 class="card-title">${producto.name}</h5>
-                            <p class="card-text">${producto.description}</p>
-                            <p class="card-text"><strong>Precio: $${producto.price.toLocaleString('es-CL')}</strong></p>
-                            <p class="card-text">Categoría: ${producto.category}</p>
-                            <p class="card-text">Stock: ${producto.stock}</p>
+                            <h5 class="card-title fw-bold text-primary mb-3" style="font-size: 1.25rem;">${producto.name}</h5>
+                            <p class="card-text text-muted mb-3" style="font-size: 0.9rem; line-height: 1.5;">${producto.description}</p>
+                            <p class="card-text price-tag mb-3" style="font-size: 1.4rem; color: #2ecc71; font-weight: 600;">
+                                ${formatearPrecioChileno(producto.price)}
+                            </p>
+                            <div class="product-meta" style="display: flex; justify-content: space-between; align-items: center;">
+                                <span class="badge bg-info text-white" style="padding: 0.5rem 1rem; border-radius: 20px;">
+                                    ${producto.category === 'Ninos' ? 'Niños' : producto.category}
+                                </span>
+                                <span class="stock-badge ${producto.stock > 5 ? 'bg-success' : 'bg-warning'}" 
+                                      style="padding: 0.4rem 0.8rem; border-radius: 15px; color: white; font-size: 0.85rem;">
+                                    ${producto.stock} disponibles
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -129,6 +138,14 @@ async function verificarAPI() {
         console.error('Error al verificar API:', error);
         return false;
     }
+}
+
+function formatearPrecioChileno(precio) {
+    return new Intl.NumberFormat('es-CL', {
+        style: 'currency',
+        currency: 'CLP',
+        minimumFractionDigits: 0
+    }).format(precio);
 }
 
 // Verificar API al cargar la página
