@@ -94,7 +94,15 @@
                                         icon: 'success',
                                         title: '¡Éxito!',
                                         text: 'Producto agregado a su carrito',
-                                        confirmButtonColor: '#198754'
+                                        confirmButtonColor: '#198754',
+                                        timer: 2000,
+                                        timerProgressBar: true,
+                                        showClass: {
+                                            popup: 'animate__animated animate__fadeInDown'
+                                        },
+                                        hideClass: {
+                                            popup: 'animate__animated animate__fadeOutUp'
+                                        }
                                     });">
                                         <i class="bi bi-cart-plus"></i> Agregar al carrito
                                     </button>
@@ -178,9 +186,6 @@
                 carrito.push(producto);
                 localStorage.setItem('carrito', JSON.stringify(carrito));
                 
-                
-                // Opcional: Mostrar mensaje de confirmación
-                alert('Producto agregado al carrito');
                 // Actualizar el contador inmediatamente después de agregar
                 actualizarContadorCarrito();
             }
