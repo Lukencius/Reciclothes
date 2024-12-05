@@ -201,7 +201,7 @@
                             <div class="col-md-8">
                                 <div class="card-body">
                                     <h5 class="card-title">${item.name}</h5>
-                                    <p class="card-text">Precio: $${item.price.toLocaleString('es-CL')}</p>
+                                    <p class="card-text">Precio: ${formatearPrecioChileno(item.price)}</p>
                                     <div class="d-flex align-items-center">
                                         <button class="btn btn-sm btn-outline-secondary" onclick="actualizarCantidad(${item.Id_Producto}, -1)">-</button>
                                         <span class="mx-2">Cantidad: ${item.cantidad}</span>
@@ -522,6 +522,14 @@
                 form.querySelector('[name="direccion"]').value = userData.address || '';
                 form.querySelector('[name="numeroCasa"]').value = userData.numero_casa || '';
             }
+        }
+        
+        function formatearPrecioChileno(precio) {
+            return new Intl.NumberFormat('es-CL', {
+                style: 'currency',
+                currency: 'CLP',
+                minimumFractionDigits: 0
+            }).format(precio);
         }
     </script>
 </body>
