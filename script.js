@@ -102,22 +102,46 @@ document.addEventListener('DOMContentLoaded', function() {
             const imgSrc = producto.imagen || 'media/polera.png';
             return `
                 <div class="col-md-4 mb-4">
-                    <div class="card product-card" style="cursor: pointer; transition: transform 0.3s; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" onclick="verDetalleProducto(${JSON.stringify(producto).replace(/"/g, '&quot;')})">
-                        <img src="${imgSrc}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="${producto.name}" onerror="this.src='media/polera.png'">
-                        <div class="card-body">
-                            <h5 class="card-title fw-bold text-primary mb-3" style="font-size: 1.25rem;">${producto.name}</h5>
-                            <p class="card-text text-muted mb-3" style="font-size: 0.9rem; line-height: 1.5;">${producto.description}</p>
-                            <p class="card-text price-tag mb-3" style="font-size: 1.4rem; color: #2ecc71; font-weight: 600;">
-                                ${formatearPrecioChileno(producto.price)}
-                            </p>
-                            <div class="product-meta" style="display: flex; justify-content: space-between; align-items: center;">
-                                <span class="badge bg-info text-white" style="padding: 0.5rem 1rem; border-radius: 20px;">
+                    <div class="card product-card h-100" style="cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 15px;" 
+                         onclick="verDetalleProducto(${JSON.stringify(producto).replace(/"/g, '&quot;')})"
+                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';">
+                        <div class="position-relative">
+                            <div class="card-img-container" style="height: 280px; overflow: hidden; border-radius: 15px 15px 0 0;">
+                                <img src="${imgSrc}" 
+                                     class="card-img-top" 
+                                     style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;" 
+                                     alt="${producto.name}" 
+                                     onerror="this.src='media/placeholder.webp'"
+                                     onmouseover="this.style.transform='scale(1.1)'"
+                                     onmouseout="this.style.transform='scale(1)'">
+                            </div>
+                            ${producto.stock <= 5 ? `<span class="position-absolute top-0 end-0 m-2 badge bg-danger">¡Últimas unidades!</span>` : ''}
+                        </div>
+                        <div class="card-body d-flex flex-column p-4">
+                            <h5 class="card-title fw-bold text-primary mb-2" style="font-size: 1.3rem; line-height: 1.4;">${producto.name}</h5>
+                            <p class="card-text text-muted mb-3" style="font-size: 0.95rem; line-height: 1.6;">${producto.description}</p>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-info text-white" style="padding: 0.6rem 1.2rem; border-radius: 25px; font-size: 0.9rem;">
                                     ${producto.category === 'Ninos' ? 'Niños' : producto.category}
                                 </span>
-                                <span class="stock-badge ${producto.stock > 5 ? 'bg-success' : 'bg-warning'}" 
-                                      style="padding: 0.4rem 0.8rem; border-radius: 15px; color: white; font-size: 0.85rem;">
-                                    ${producto.stock} disponibles
-                                </span>
+                                <p class="card-text price-tag m-0" style="font-size: 1.5rem; color: #2ecc71; font-weight: 700;">
+                                    ${formatearPrecioChileno(producto.price)}
+                                </p>
+                            </div>
+                            <div class="mt-auto">
+                                <div class="progress mb-2" style="height: 10px; border-radius: 5px;">
+                                    <div class="progress-bar ${producto.stock > 5 ? 'bg-success' : 'bg-warning'}" 
+                                         role="progressbar" 
+                                         style="width: ${(producto.stock / 20) * 100}%;" 
+                                         aria-valuenow="${producto.stock}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="20">
+                                    </div>
+                                </div>
+                                <small class="text-muted d-block text-center" style="color: ${producto.stock <= 1 ? '#dc3545' : ''} !important; font-weight: ${producto.stock <= 1 ? 'bold' : 'normal'}">
+                                    ${producto.stock} unidad${producto.stock === 1 ? '' : 'es'} disponible${producto.stock === 1 ? '' : 's'}
+                                </small>
                             </div>
                         </div>
                     </div>
