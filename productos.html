@@ -11,6 +11,10 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="icon" href="media/ReciClothes_sinf.png">
+    
+    <!-- Agregar SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script src="productos.js" defer></script>
 </head>
 <body class="productos-page">
@@ -86,7 +90,12 @@
                                 </div>
                                 <input type="hidden" id="productoId">
                                 <div class="mt-auto">
-                                    <button class="btn btn-success btn-lg" onclick="agregarAlCarrito(document.getElementById('productoId').value)">
+                                    <button class="btn btn-success btn-lg" onclick="agregarAlCarrito(document.getElementById('productoId').value); Swal.fire({
+                                        icon: 'success',
+                                        title: '¡Éxito!',
+                                        text: 'Producto agregado a su carrito',
+                                        confirmButtonColor: '#198754'
+                                    });">
                                         <i class="bi bi-cart-plus"></i> Agregar al carrito
                                     </button>
                                 </div>
