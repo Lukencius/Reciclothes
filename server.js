@@ -281,7 +281,7 @@ app.post('/api/Productos', async (req, res) => {
 // Ruta para modificar un producto
 app.put('/api/Productos/:id', async (req, res) => {
     try {
-        const { name, category, price, stock, imagen } = req.body;
+        const { name, category, price, description, stock, imagen } = req.body;
         const productId = req.params.id;
 
         const connection = await mysql.createConnection(dbConfig);
@@ -299,8 +299,8 @@ app.put('/api/Productos/:id', async (req, res) => {
 
         // Actualizar el producto
         await connection.execute(
-            'UPDATE Productos SET name = ?, category = ?, price = ?, stock = ?, imagen = ? WHERE Id_Producto = ?',
-            [name, category, price, stock, imagen || null, productId]
+            'UPDATE Productos SET name = ?, category = ?, price = ?, description = ?, stock = ?, imagen = ? WHERE Id_Producto = ?',
+            [name, category, price, description || null, stock, imagen || null, productId]
         );
 
         await connection.end();
