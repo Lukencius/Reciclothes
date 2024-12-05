@@ -119,7 +119,7 @@ async function agregarAlCarrito(productoId) {
         localStorage.setItem('carrito', JSON.stringify(carrito));
         
         // Notificar al usuario
-        alert('Producto agregado al carrito');
+        // alert('Producto agregado al carrito');
         
     } catch (error) {
         console.error('Error:', error);
